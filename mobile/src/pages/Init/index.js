@@ -79,7 +79,7 @@ export default function Init() {
           });
           const login = await response.data;
           await AsyncStorage.setItem("token", login.token.toString());
-          // await AsyncStorage.setItem("user", login.id.toString());
+          await AsyncStorage.setItem("user", login.id.toString());
           await AsyncStorage.setItem("userName", login.name.toString());
           await AsyncStorage.setItem("userTags", login.tags.toString());
           singIn();

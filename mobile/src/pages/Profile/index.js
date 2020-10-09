@@ -93,6 +93,7 @@ export default function Profile({ route, navigation }) {
     try {
       const usuarioAtual = await AsyncStorage.getItem("user");
       setLoggedUser(usuarioAtual);
+      console.log(id)
       const response = await api.get(`/users/${id}`, {
         headers: { user_id: usuarioAtual },
       });
