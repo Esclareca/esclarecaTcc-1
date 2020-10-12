@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Esclareça",
-    "slug": "testapkss",
-    "description": "Você sem dúvidas!",
+    "slug": "esclarecaApp",
+    "description": "Esclareça - Você sem dúvidas!",
     "sdkVersion": "38.0.0",
     "platforms": [
       "ios",
