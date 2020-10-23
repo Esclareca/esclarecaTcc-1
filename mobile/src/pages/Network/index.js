@@ -334,7 +334,7 @@ export default function Network() {
                           {user.name}
                         </Text>
                         <Text style={styles.postTag}>
-                          {handleLimitBigText(user.tags.toString(","), 20)}
+                          {handleLimitBigText(user.tags.join(', '), 20)}
                         </Text>
                       </View>
                     </TouchableOpacity>

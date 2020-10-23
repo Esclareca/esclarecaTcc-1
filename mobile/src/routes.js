@@ -178,7 +178,7 @@ function CustomDrawerContent(props) {
                     {userName ? userName : "Meu perfil"}
                   </Text>
                   <Text style={{ fontSize: 13, color: "#365478" }}>
-                    {userTags ? userTags.toString() : ""}
+                    {userTags ? userTags.join(', ') : ""}
                   </Text>
                 </View>
               </View>

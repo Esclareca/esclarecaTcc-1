@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native'
 
 import { Image, View, AsyncStorage, KeyboardAvoidingView, Text, TextInput, TouchableOpacity, StatusBar, ScrollView } from "react-native";
 import api from '../../services/api'
 
-import logo from '../../assets/logo.png'; // Nessa página poderia usar uma logo maior
 import styles from './styles'
 import * as Animatable from 'react-native-animatable'
 import { Feather } from '@expo/vector-icons'
@@ -23,10 +22,7 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [confirmPass, setConfirmPass] = useState('');
     const [tags, setTags] = useState('');
-    //const [file, setFile] = useState(null);
     const [avatar, setAvatar] = useState('https://www.colegiodepadua.com.br/img/user.png');
-    //const [isUploadingImage, setIsUploadingImage] = useState(false)
-    //const [visible, setVisible] = useState(false);
 
     //Inserir tratamento para caso tente inserir vazio
     async function handleSubmit() {
@@ -40,13 +36,11 @@ export default function Register() {
                             const response = await api.post('/signup', {
                                 name, email, password, tags
                             })
-
                             if (response.status == 204) {
                                 showSucess("Usuário cadastrado com sucesso")
-                                //navigation.goBack()
                                 try {
                                     const response = await api.post('/signin', {
-                                        email, password: password
+                                        email, password: password, type: 'app'
                                     });
                                     const user = response.data;
                                     try {

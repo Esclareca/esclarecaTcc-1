@@ -1,25 +1,16 @@
 const bcrypt = require("bcrypt-nodejs");
 const Users = require("../models/Users");
 const { hostIp } = require("../.env");
-const nodemailer = require("nodemailer");
+const sendEmail = require('../config/email')
 const crypto = require("crypto");
 const aws = require("aws-sdk");
+var momentTz = require("moment-timezone");
+
 const {
-  storageOption,
   s3Config_bucket,
   s3Config_accessKeyId,
-  s3Config_secretAccessKey,
-  userMail,
-  passMail,
+  s3Config_secretAccessKey
 } = require("../.env");
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: userMail,
-    pass: passMail,
-  },
-});
 
 module.exports = (app) => {
   const obterHash = (password, callback) => {
@@ -30,6 +21,8 @@ module.exports = (app) => {
   const save = async (req, res) => {
     const email = req.body.email.trim().toLowerCase();
     const tags = req.body.tags.trim();
+    const type = req.body.type;
+
     let { key = "", location: url = "" } = "";
 
     if (req.body.avatarUser) {
@@ -45,21 +38,41 @@ module.exports = (app) => {
     if (userExist) {
       res.status(400).json(`${email} já foi cadastrado\nEsqueceu sua senha?`);
     } else {
-      obterHash(req.body.password.trim().toLowerCase(), (hash) => {
+      if (type == 'app') {
+        obterHash(req.body.password.trim().toLowerCase(), (hash) => {
+          Users.create({
+            name: req.body.name,
+            email,
+            password: hash,
+            tags: tags.split(",").map((tag) => tag.trim().toLowerCase()),
+            key,
+            url,
+            ranking: 0,
+            blocked: [],
+            followed: [],
+            idGoogle: '',
+            idFacebook: '',
+          })
+            .then((u) => res.status(204).send(u))
+            .catch((err) => res.status(400).json(err));
+        });
+      } else {
         Users.create({
           name: req.body.name,
           email,
-          password: hash,
+          password: '',
           tags: tags.split(",").map((tag) => tag.trim().toLowerCase()),
           key,
           url,
           ranking: 0,
           blocked: [],
           followed: [],
+          idGoogle: type == 'google' ? req.body.idGoogle : '',
+          idFacebook: type == 'facebook' ? req.body.idFacebook : '',
         })
           .then((u) => res.status(204).send(u))
           .catch((err) => res.status(400).json(err));
-      });
+      }
     }
   };
   const update = (req, res) => {
@@ -80,16 +93,28 @@ module.exports = (app) => {
         .then((_) => res.status(204).send())
         .catch((err) => res.status(400).json(err));
     } else {
-      obterHash(req.body.password.trim().toLowerCase(), (hash) => {
-        Users.findOneAndUpdate(user.id, {
+      if (req.body.password.trim()) {
+        obterHash(req.body.password.trim().toLowerCase(), (hash) => {
+          Users.findByIdAndUpdate(user.id, {
+            name,
+            email,
+            password: hash,
+            tags: tags.split(",").map((tag) => tag.trim().toLowerCase()),
+          })
+            .then((_) => res.status(204).send())
+            .catch((err) => res.status(500).json(err));
+        });
+      } else {
+        console.log(req.body.password)
+        console.log(tags)
+        Users.findByIdAndUpdate(user.id, {
           name,
           email,
-          password: hash,
           tags: tags.split(",").map((tag) => tag.trim().toLowerCase()),
         })
           .then((_) => res.status(204).send())
           .catch((err) => res.status(500).json(err));
-      });
+      }
     }
   };
 
@@ -289,18 +314,16 @@ module.exports = (app) => {
         return res.status(400).json(`${email} inexistente!`);
       } else {
         obterHash(token.trim().toLowerCase(), (hash) => {
-          userExist.password = hash;
+          userExist.hashForgot = hash;
+          userExist.hashExpiresAt = momentTz().add(1, 'h').tz("America/Sao_Paulo").format()
           userExist.save().then((savedUser) => {
-            transporter.sendMail({
-              to: email,
-              from: userMail,
-              subject: "Esqueceu a senha",
-              html: `
-                                <p>Olá ${userExist.name}, você esqueceu sua senha?</p>
-                                <h5>Esta é o seu código: ${token}</h5>
-                                <p>Volte para o aplicativo e insira-o no campo destinada para prosseguir! :)</p>
-                            `,
-            });
+            title = "Esqueceu a senha"
+            body = `<p>Olá ${userExist.name}, você esqueceu sua senha?</p>
+                    <h4>Este é o seu código: </h4>
+                    <h3>${token}<h3>
+                    <h4>O token é válido por uma hora!</h4>
+                    <p>Volte para o aplicativo e insira-o no campo destinado para prosseguir! :)</p>`
+            sendEmail(email, title, body)
             res.status(200).json({
               message: "Verifique seu e-mail e faça o login com a sua senha!",
             });
@@ -317,20 +340,25 @@ module.exports = (app) => {
 
     const userExist = await Users.findOne({ email });
     if (!userExist) {
-      return res.status(400).json(`${email} inexistente!`);
+      return res.status(400).send(`${email} inexistente!`);
     } else {
-      bcrypt.compare(hash, userExist.password, (err, isMatch) => {
-        if (err || !isMatch) {
-          res.status(401).send("Código informálido inválido ou expirado.");
-          return;
-        }
-        obterHash(newPass, (cod) => {
-          userExist.password = cod;
-          userExist.save().then((savedUser) => {
-            res.status(200).json({ message: "Senha alterada com sucesso!" });
+      console.log(new Date() + " - " + userExist.hashExpiresAt)
+      if (new Date() > userExist.hashExpiresAt) {
+        return res.status(401).send("O token está expirado!");
+      } else {
+        bcrypt.compare(hash, userExist.hashForgot, (err, isMatch) => {
+          if (err || !isMatch) {
+            res.status(401).send("Código informálido inválido.");
+            return;
+          }
+          obterHash(newPass, (cod) => {
+            userExist.password = cod;
+            userExist.save().then((savedUser) => {
+              res.status(200).json({ message: "Senha alterada com sucesso!" });
+            });
           });
         });
-      });
+      }
     }
   };
 

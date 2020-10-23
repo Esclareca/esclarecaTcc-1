@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 
 import {
@@ -20,7 +20,6 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as Facebook from "expo-facebook";
 import * as Google from "expo-google-app-auth";
 import { AuthContext } from "../../context";
-import { showError } from "../../common";
 import UserPermission from "../../UserPermissions";
 
 export default function Init() {
@@ -31,9 +30,9 @@ export default function Init() {
     navigation.navigate("Login");
   }
 
-  async function navigateToTags(user) {
+  async function navigateToTags(user, type) {
     navigation.navigate("Tags", {
-      user,
+      user, type
     });
   }
 
@@ -69,13 +68,15 @@ export default function Init() {
         );
         try {
           data = await response.json();
-          console.log(data);
         } catch { }
         try {
           //LOGIN
           const response = await api.post("/signin", {
             email: data.email,
-            password: data.id,
+            password: '',
+            type: 'facebook',
+            // idGoogle: route.params.type == 'google' ? tempUser.id : '',
+            idFacebook: data.id
           });
           const login = await response.data;
           await AsyncStorage.setItem("token", login.token.toString());
@@ -84,7 +85,7 @@ export default function Init() {
           await AsyncStorage.setItem("userTags", login.tags.toString());
           singIn();
         } catch (e) {
-          navigateToTags(data);
+          navigateToTags(data, 'facebook');
         }
         //
       } else {
@@ -116,7 +117,10 @@ export default function Init() {
       try {
         loginRequest = await api.post("/signin", {
           email: googleRequest.user.email,
-          password: googleRequest.user.id,
+          password: '',
+          type: 'google',
+          idGoogle: googleRequest.user.id
+          // idFacebook: data.id
         });
         await AsyncStorage.setItem("user", loginRequest.data.id.toString());
         await AsyncStorage.setItem("token", loginRequest.data.token.toString());
@@ -124,8 +128,7 @@ export default function Init() {
         await AsyncStorage.setItem("userTags", loginRequest.data.tags.toString());
         singIn();
       } catch (e) {
-        console.log("Erro " + e);
-        navigateToTags(googleRequest.user);
+        navigateToTags(googleRequest.user, 'google');
       }
     } else {
       console.log("Login com google não obteve sucesso");

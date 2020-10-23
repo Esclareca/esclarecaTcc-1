@@ -24,9 +24,9 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     backgroundColor:'white', 
     borderRadius:10,
-    marginHorizontal:50,
-    marginVertical:'50%',
-    height:hp('20%')
+    marginHorizontal:30,
+    marginTop:'50%',
+    // height:hp('20%')
   },
   label1: {
       fontWeight: 'bold',
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: 'bold',
     color: '#365478',
-    fontSize: 15,
+    fontSize: 20,
     left:2
 },
   input: {

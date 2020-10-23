@@ -44,6 +44,10 @@ const UserSchema = new mongoose.Schema({
         ref: 'Users'
     }],
     pushToken: String,
+    idGoogle: String,
+    idFacebook: String,
+    hashForgot: String,
+    hashExpiresAt: Date
 });
 
 UserSchema.pre("save", function () {

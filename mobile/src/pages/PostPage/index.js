@@ -394,7 +394,7 @@ export default function PostPage({ route, navigation }) {
           <View style={{ paddingLeft: 10 }}>
             <TouchableOpacity onPress={() => navigateToProfile(post.user._id)}>
               <Text style={styles.CorpoTitle}>{post.user.name}</Text>
-              <Text style={styles.Nomepost}>{post.tags.toString()}</Text>
+              <Text style={styles.Nomepost}>{post.tags.join(', ')}</Text>
             </TouchableOpacity>
             <ScrollView>
               <Text

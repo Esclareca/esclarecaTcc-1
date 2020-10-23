@@ -209,7 +209,7 @@ export default function Posts(props) {
                     </View>
                   </View>
                   <View style={styles.headerTags}>
-                    <Text style={styles.postTag}>{post.tags.toString()}</Text>
+                    <Text style={styles.postTag}>{post.tags.join(', ')}</Text>
                     <TouchableOpacity
                       style={styles.Ver}
                       onPress={() => navigateToPost(post)}

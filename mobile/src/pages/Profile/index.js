@@ -93,7 +93,6 @@ export default function Profile({ route, navigation }) {
     try {
       const usuarioAtual = await AsyncStorage.getItem("user");
       setLoggedUser(usuarioAtual);
-      console.log(id)
       const response = await api.get(`/users/${id}`, {
         headers: { user_id: usuarioAtual },
       });
@@ -124,10 +123,6 @@ export default function Profile({ route, navigation }) {
   }
 
   async function updateUser() {
-    if (password.trim() == "") {
-      showError("Confirme ou digite sua nova senha!");
-      return;
-    }
     const response = await api.put(`/users`, {
       name,
       email,
@@ -403,7 +398,7 @@ export default function Profile({ route, navigation }) {
                       placeholderTextColor="#999"
                       autoCapitalize="words"
                       autoCorrect={false}
-                      value={tags.toString()}
+                      value={tags.join(', ')}
                       onChangeText={setTags}
                       numberOfLines={2}
                       returnKeyType = { "next" }
@@ -414,7 +409,7 @@ export default function Profile({ route, navigation }) {
                     <Text style={styles.modalSubtitle}>Senha</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Altere sua senha..."
+                      placeholder="Preencha caso deseje alterar sua senha..."
                       placeholderTextColor="#999"
                       secureTextEntry={true}
                       password={true}
@@ -647,7 +642,7 @@ export default function Profile({ route, navigation }) {
       <View style={styles.body}>
         <View style={styles.perfilName}>
           <Text style={styles.name}>{name}</Text>
-          <Text style={styles.info}>{tags.toString()}</Text>
+          <Text style={styles.info}>{tags.join(', ')}</Text>
         </View>
         {isUploadingImage && isLoggedUser ? (
           <TouchableOpacity

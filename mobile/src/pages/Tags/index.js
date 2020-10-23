@@ -38,9 +38,12 @@ export default function Tags({ route, navigation }) {
       const response = await api.post("/signup", {
         name: tempUser.name,
         email: tempUser.email,
-        password: tempUser.id,
+        password: '',
         tags,
         avatarUser: avatarUser,
+        type: route.params.type,
+        idGoogle: route.params.type == 'google' ? tempUser.id : '',
+        idFacebook: route.params.type == 'facebook' ? tempUser.id : ''
       });
       if (response.status == 204) {
         showSucess(`Bem-vindo ${tempUser.name}!`);
@@ -49,6 +52,9 @@ export default function Tags({ route, navigation }) {
           const response = await api.post("/signin", {
             email: tempUser.email,
             password: tempUser.id,
+            type: route.params.type,
+            idGoogle: route.params.type == 'google' ? tempUser.id : '',
+            idFacebook: route.params.type == 'facebook' ? tempUser.id : ''
           });
           const user = response.data;
           try {
