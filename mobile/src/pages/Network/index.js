@@ -331,7 +331,7 @@ export default function Network() {
                             fontWeight: "bold",
                           }}
                         >
-                          {user.name}
+                          {handleLimitBigText(user.name, 20)}
                         </Text>
                         <Text style={styles.postTag}>
                           {handleLimitBigText(user.tags.join(', '), 20)}

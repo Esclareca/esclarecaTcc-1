@@ -3,20 +3,21 @@ const mongoose = require('mongoose');
 
 const Users = require('../models/Users');
 const Slacks = require('../models/Slacks');
+const Slacks_Messages = require('../models/Slacks_Messages');
 
 module.exports = app => {
     const index = async (req, res) => {
-        const {  search_text } = req.headers;
+        const { search_text } = req.headers;
         const { page } = req.query;
         const user = req.user;
         const qtdLoad = 10
-
+        const searchText = search_text.trim().toLowerCase()
         const count = await Slacks.find({ tag: { $in: search_text != "" ? search_text.split(',') : user.tags }, user: { $nin: user.blocked } }).countDocuments()
         res.header('X-Total-Count', count)
-
         const slacks = await Slacks
-            .aggregate([
-                { $match: { tag: { $in: search_text != "" ? search_text.split(',') : user.tags }, user: { $nin: user.blocked } } },
+            .aggregate([//Condição da esquerda ou user q criou
+                { $match: { $or: [{ tag: { $in: search_text != "" ? searchText.split(',') : user.tags }, user: { $nin: user.blocked } }, { user: mongoose.Types.ObjectId(user.id) }] } },
+                // { $match: { user: mongoose.Types.ObjectId(user.id)} },//Condição da esquerda ou user q criou
                 { $sort: { createdIn: -1 } },
                 {
                     $lookup: {
@@ -57,20 +58,19 @@ module.exports = app => {
         return res.json(slacks)
     }
     const save = async (req, res) => {
-        let { nome, tag } = req.body;
-        const { senha } = req.body;
+        let { nome, tag, senha } = req.body;
         const user = req.user;
 
-        const valid = nome && tag
-        valid == false ? res.status(400).send('Algum campo não foi preenchido') : null
-        
-        if (nome.trim() === '' || tag.trim() === '') {
-            return res.status(400).send('Algum campo não foi preenchido');
+        if (!nome || nome.trim() == '') {
+            return res.status(400).send("Verifique se o nome foi preenchido corretamente e tente novamente")
+        }
+        if (!tag || tag.trim() == '') {
+            return res.status(400).send("Verifique se a tag foi preenchida corretamente e tente novamente")
         }
 
-        nome.trim()
-        tag.trim().toLowerCase()
-        senha ? senha.trim() : senha
+        nome = nome.trim()
+        tag = tag.trim().toLowerCase()
+        senha = senha ? senha.trim() : ''
 
         const slack = await Slacks.create({
             nome,
@@ -82,21 +82,25 @@ module.exports = app => {
             .catch(err => res.status(400).json(err))
         //Soma os pontos ao ranking do usuário
         const result = await Users.findByIdAndUpdate(user.id, { ranking: user.ranking + 5 })
-        return res.status(204).send()
+        return res.status(201).json(slack)
     }
     const remove = async (req, res) => {
         const { slack } = req.params;
         const user = req.user;
-       
+
         const slackRemove = await Slacks.findById(slack)
             .catch(err => { return res.status(400).json(err) })//Caso o id seja inválido vai cair aqui
-
         if (!slackRemove) { return res.status(400).send("Slack não encontrado com o id: " + slack) }//Caso o id seja válido mas não exista vai cair aqui
         if (slackRemove.user == user.id) {//Se é o dono post deleta
-            await Slacks.deleteOne(slackRemove)
-            const result = await Users.findByIdAndUpdate(user.id, { ranking: user.ranking - 5 })
-                .catch(err => { return res.status(400).json(err) })
-            return res.status(204).send()
+            const slacks = await Slacks_Messages.find({ slack: slack }).countDocuments()
+            if (slacks == 0) {
+                await Slacks.deleteOne(slackRemove)
+                const result = await Users.findByIdAndUpdate(user.id, { ranking: user.ranking - 5 })
+                    .catch(err => { return res.status(400).json(err) })
+                return res.status(204).send()
+            }
+            return res.status(406).json('O EsclaChat não pode ser excluído enquanto existirem mensagens no mesmo')
+
         } else {//Se não, não tem permissão
             return res.status(401).send(`Usuário ${user.name} não autorizado a deletar o post.`)
         }

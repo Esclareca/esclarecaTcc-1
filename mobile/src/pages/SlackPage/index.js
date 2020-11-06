@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Text, View, TouchableOpacity, AsyncStorage, Alert, TextInput, FlatList, ActivityIndicator, Image } from 'react-native';
 import { Feather, Foundation } from '@expo/vector-icons'
 import * as Animatable from 'react-native-animatable'
 
-import { showError, showSucess, handleDate } from '../../common'
+import { showError, showSucess, handleDate, handleLimitBigText } from '../../common'
 import api from '../../services/api'
+import socket from '../../services/socket'
 
 import styles from './styles'
 
 export default function SlackPage({ route, navigation }) {
     const [user, setUser] = useState(null)
     const [slack, setSlack] = useState(route.params.slack)
-    const [messages, setMessages] = useState()
+    const [last, setLast] = useState(0)
+    const [messages, setMessages] = useState([])
     const [messageText, setMessageText] = useState('')
 
     const [total, setTotal] = useState(0)
@@ -25,28 +27,39 @@ export default function SlackPage({ route, navigation }) {
         async function loadUser() {
             setUser(await AsyncStorage.getItem('user'))
         }
+        socket.emit('join', route.params.slack._id)
     }, [])
+
+    useEffect(() => {
+        socket.on('delMessage', async msg => {
+            const filteredMsg = messages.filter((item) => item._id !== msg);
+            setMessages(filteredMsg)
+        })
+    }, [messages])
+
+    useEffect(() => {
+        socket.on('newMessage', async msg => {
+            await loadMessages()
+        })
+    }, [last])
 
     function navigateToProfile(userId) {
         navigation.navigate('Profile', {
             userId
         })
     }
-
     async function handlePostMessage() {
         if (messageText.trim() !== '') {
             try {
                 const user_id = await AsyncStorage.getItem('user');
                 const response = await api.post(`/slacks/${slack._id}`, {
                     slack_msg: messageText,
-                }, {
-                    headers: { user_id },
                 })
 
                 if (response.status == 204) {
                     showSucess("Comentário cadastrado com sucesso")
                     setMessageText('')
-                    await reloadMessages()
+                    // await reloadMessages()
                 } else {
                     showError("Ocorreu um erro")
                 }
@@ -57,26 +70,28 @@ export default function SlackPage({ route, navigation }) {
         }
     }
 
-    async function loadMessages() {
+    const loadMessages = async () => {
         if (loading) {//Impede que uma busca aconteça enquanto uma requisição já foi feita
             return
         }
 
-        if (total > 0 && messages.length == total) {//Impede que faça a requisição caso a qtd máxima já tenha sido atingida
-            return
-        }
-
+        // if (total > 0 && messages.length == total) {//Impede que faça a requisição caso a qtd máxima já tenha sido atingida
+        //     return
+        // }
         setLoading(true)//Altera para o loading iniciado
         try {
-            const user_id = await AsyncStorage.getItem('user');
             const response = await api.get(`/slacks/${slack._id}`,
                 {
-                    headers: { user_id },
+                    headers: {
+                        last_id: last
+                    },
                     params: { page }
                 })
 
-            setMessages([...messages, ...response.data])
             if (response.data.length > 0) {
+                // lastId = response.data[response.data.length - 1]._id
+                setLast(response.data[response.data.length - 1]._id)
+                setMessages([...messages, ...response.data])
                 setPage(page + 1)
                 setTotal(response.headers['x-total-count'])
             }
@@ -94,14 +109,16 @@ export default function SlackPage({ route, navigation }) {
         setRefreshing(true)//Altera para o loading iniciado
 
         try {
-            const user_id = await AsyncStorage.getItem('user')
             const response = await api.get(`/slacks/${slack._id}`, {
-                headers: { user_id },
+                headers: { last_id: last },
                 params: { page: 1 }
             })
-            setMessages(response.data)
-            if (response.status == 200) {
+
+            if (response.data.length > 0) {
                 setPage(2)
+                setMessages(response.data)
+                // lastId = response.data[response.data.length - 1]._id
+                setLast(response.data[response.data.length - 1]._id)
                 setTotal(response.headers['x-total-count'])
             }
         } catch (e) {
@@ -119,12 +136,11 @@ export default function SlackPage({ route, navigation }) {
             })
 
             if (response.status == 204) {
-                await reloadMessages()
+                // await reloadMessages()
             }
         } catch (e) {
             showError(e)
         }
-
     }
 
     renderFooter = () => {
@@ -157,7 +173,7 @@ export default function SlackPage({ route, navigation }) {
                             keyExtractor={message => String(message._id)}
                             onEndReached={loadMessages}
                             onEndReachedThreshold={0.2}
-                            showsVerticalScrollIndicator={false}
+                            showsVerticalScrollIndicator={true}
                             refreshing={refreshing}
                             onRefresh={reloadMessages}
                             ListFooterComponent={renderFooter}
@@ -174,14 +190,13 @@ export default function SlackPage({ route, navigation }) {
                                                     <Image style={styles.avatar} source={{ uri: message.user.url ? message.user.url : 'https://www.colegiodepadua.com.br/img/user.png' }} />
                                                     : <Feather name="camera" size={30} color='#D8D9DB' />}
                                                 <TouchableOpacity onPress={() => navigateToProfile(message.user._id)}>
-                                                    <Text style={styles.postTitle}>{message.user ? message.user.name : ''}</Text>
+                                                    <Text style={styles.postTitle}>{handleLimitBigText(message.user.name, 20)}</Text>
                                                 </TouchableOpacity>
                                             </View>
                                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                                                 <Text style={styles.Nomepost}>{handleDate(message.postedIn)}</Text>
                                                 {user != null && (user == slack.user._id || user == message.user._id) ?
                                                     <>
-
                                                         <TouchableOpacity onPress={() =>
                                                             Alert.alert(
                                                                 'Excluir',
@@ -189,7 +204,7 @@ export default function SlackPage({ route, navigation }) {
                                                                 [
                                                                     { text: 'Não', onPress: () => { return null } },
                                                                     {
-                                                                        text: 'Sim', onPress: () => { handleDeleteMessage(message._id) }
+                                                                        text: 'Sim', onPress: async () => { await handleDeleteMessage(message._id) }
                                                                     },
                                                                 ],
                                                                 { cancelable: false }

@@ -398,7 +398,7 @@ export default function Profile({ route, navigation }) {
                       placeholderTextColor="#999"
                       autoCapitalize="words"
                       autoCorrect={false}
-                      value={tags.join(', ')}
+                      value={tags.toString(', ')}
                       onChangeText={setTags}
                       numberOfLines={2}
                       returnKeyType = { "next" }
@@ -642,7 +642,7 @@ export default function Profile({ route, navigation }) {
       <View style={styles.body}>
         <View style={styles.perfilName}>
           <Text style={styles.name}>{name}</Text>
-          <Text style={styles.info}>{tags.join(', ')}</Text>
+          <Text style={styles.info}>{tags.toString(', ')}</Text>
         </View>
         {isUploadingImage && isLoggedUser ? (
           <TouchableOpacity

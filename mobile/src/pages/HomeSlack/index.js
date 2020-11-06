@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Text,
   View,
@@ -13,7 +13,7 @@ import {
   FlatList,
 } from "react-native";
 import { Feather, FontAwesome, Foundation } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 import Dialog from "react-native-dialog";
 import { showError, showSucess, handleDate } from "../../common";
@@ -56,9 +56,14 @@ export default function HomeSlack(props) {
     setSenha("");
   }
 
-  useEffect(() => {
-    reloadSlacks();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+      async function reload() {
+        await reloadSlacks();
+      }
+    }, [])
+  );
 
   async function loadSlacks() {
     if (loading) {
@@ -105,6 +110,8 @@ export default function HomeSlack(props) {
     }
 
     const user_id = await AsyncStorage.getItem("user");
+    setIdU(user_id);
+
     try {
       const response = await api.get(`/slacks`, {
         headers: { user_id, search_text: searchText },
@@ -139,14 +146,15 @@ export default function HomeSlack(props) {
           headers: { user_id },
         }
       );
-      if (response.status == 204) {
+      if (response.status == 201) {
         showSucess("EsclaChat criado com sucesso");
         setNomeModal("");
         setTagModal("");
         setPrivadoModal(false);
         setSenhaModal("");
         handleModal();
-        reloadSlacks();
+        // reloadSlacks();
+        navigateToSlack(response.data, response.data.senha)
       } else {
         showError("Ocorreu um erro: " + response);
       }
@@ -167,7 +175,7 @@ export default function HomeSlack(props) {
         showError("Ocorreu um erro: " + response);
       }
     } catch (e) {
-      showError("Ocorreu um erro: " + e);
+      showError(e);
     }
   }
 
@@ -195,12 +203,12 @@ export default function HomeSlack(props) {
       }
     }
   }
-  async function navigateToSlack(slackParam) {
-    if (slackParam.senha != "") {
+  async function navigateToSlack(slackParam, senha) {
+    if (slackParam.senha == "" || senha != slackParam) {
+      navigation.navigate("SlackPage", { slack: slackParam });
+    } else {
       setSlackToLog(slackParam);
       setDialogVisible((previousState) => !previousState);
-    } else {
-      navigation.navigate("SlackPage", { slack: slackParam });
     }
   }
 
@@ -320,8 +328,8 @@ export default function HomeSlack(props) {
                         />
                       </>
                     ) : (
-                      <></>
-                    )}
+                        <></>
+                      )}
                   </View>
                   <View style={styles.buttonView}>
                     <TouchableOpacity
@@ -521,8 +529,8 @@ export default function HomeSlack(props) {
                       </TouchableOpacity>
                     </>
                   ) : (
-                    <></>
-                  )}
+                      <></>
+                    )}
                 </View>
                 <TouchableOpacity
                   style={styles.Ver}

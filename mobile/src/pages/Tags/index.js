@@ -58,6 +58,7 @@ export default function Tags({ route, navigation }) {
           });
           const user = response.data;
           try {
+            await AsyncStorage.setItem("token", user.token.toString());
             await AsyncStorage.setItem("user", user.id.toString());
             await AsyncStorage.setItem("userName", user.name.toString());
             await AsyncStorage.setItem("userTags", user.tags.toString());

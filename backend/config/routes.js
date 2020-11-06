@@ -73,7 +73,7 @@ module.exports = app => {
         .all(app.config.passport.authenticate())
         .get(app.api.slacks.index)
         .post(app.api.slacks.save)
-    app.delete('/slacks/:slack', app.api.slacks.remove)
+    app.delete('/slacks/:slack', app.config.passport.authenticate(), app.api.slacks.remove)
 
     //Slacks Messages
     app.route('/slacks/:slack')

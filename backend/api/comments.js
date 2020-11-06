@@ -76,13 +76,17 @@ module.exports = app => {
 
     const save = async (req, res) => {
         //const { filename } = req.file;
-        const { message } = req.body
+        let { message } = req.body
         const { post } = req.params
         const user = req.user;
 
-        if (!post || !message) {
-            return res.status(400).send('Algum campo não foi preenchido');
+        if (!post) {
+            return res.status(400).send('O post não foi preenchido');
         }
+        if (!message || message.trim() == '') {
+            return res.status(400).send('A mensagem não foi preenchida corretamente');
+        }
+        message = message.trim()
         await Posts_Comments.create({
             post,
             user: user.id,

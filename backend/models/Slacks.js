@@ -5,7 +5,6 @@ const SlacksSchema = new mongoose.Schema({
     tag: [String],
     senha: String,
     createdIn: Date,
-
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Users'
