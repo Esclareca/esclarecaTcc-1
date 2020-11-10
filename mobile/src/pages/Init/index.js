@@ -59,6 +59,7 @@ export default function Init() {
         declinedPermissions,
       } = await Facebook.logInWithReadPermissionsAsync("788451035063636", {
         permissions: ["public_profile", "email"],
+        behavior: 'web'
       });
       if (type === "success") {
         // Get the user's name using Facebook's Graph API
