@@ -57,7 +57,7 @@ export default function SlackPage({ route, navigation }) {
                 })
 
                 if (response.status == 204) {
-                    showSucess("Comentário cadastrado com sucesso")
+                    //showSucess("Comentário cadastrado com sucesso")
                     setMessageText('')
                     // await reloadMessages()
                 } else {
