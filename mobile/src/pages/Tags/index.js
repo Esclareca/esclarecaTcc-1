@@ -86,7 +86,7 @@ export default function Tags({ route, navigation }) {
   async function handleSubmit() {
     try {
       const response = await api.post("/signup", {
-        name: tempUser.name,
+        name: route.params.type == 'google' ? tempUser.displayName : tempUser.name,
         email: tempUser.email,
         password: '',
         tags,
@@ -96,12 +96,12 @@ export default function Tags({ route, navigation }) {
         idFacebook: route.params.type == 'facebook' ? tempUser.id : ''
       });
       if (response.status == 204) {
-        showSucess(`Bem-vindo ${tempUser.name}!`);
+        showSucess(`Bem-vindo ${route.params.type == 'google' ? tempUser.displayName : tempUser.name}!`);
         //navigation.goBack()
         try {
           const response = await api.post("/signin", {
             email: tempUser.email,
-            password: tempUser.id,
+            password: '',
             type: route.params.type,
             idGoogle: route.params.type == 'google' ? tempUser.uid : '',
             idFacebook: route.params.type == 'facebook' ? tempUser.id : ''

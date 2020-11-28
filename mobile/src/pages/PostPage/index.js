@@ -95,7 +95,7 @@ export default function PostPage({ route, navigation }) {
         );
 
         if (response.status == 204) {
-          //showSucess("Comentário cadastrado com sucesso");
+          // showSucess("Comentário cadastrado com sucesso");
           setCommentText("");
           setPress(!press);
           //sendPushNotification(post.user.pushToken)

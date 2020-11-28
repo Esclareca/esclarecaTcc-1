@@ -147,7 +147,7 @@ export default function HomeSlack(props) {
         }
       );
       if (response.status == 201) {
-        showSucess("EsclaChat criado com sucesso");
+        // showSucess("EsclaChat criado com sucesso");
         setNomeModal("");
         setTagModal("");
         setPrivadoModal(false);

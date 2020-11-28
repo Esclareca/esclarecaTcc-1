@@ -134,9 +134,9 @@ export default function Init() {
         scopes: ["profile", "email"],
       });
     } catch ({ message }) {
-      Alert.alert('login: Error:' + JSON.stringify(message));
+      // Alert.alert('login: Error:' + JSON.stringify(message));
     }
-    Alert.alert('erro:',JSON.stringify(googleRequest.user))
+    // Alert.alert('erro:',JSON.stringify(googleRequest.user))
     if (googleRequest.type === "success") {
       let loginRequest;
       //LOGIN
@@ -154,7 +154,8 @@ export default function Init() {
         await AsyncStorage.setItem("userTags", loginRequest.data.tags.toString());
         singIn();
       } catch (e) {
-        Alert.alert('User:' + JSON.stringify(e))
+        // Alert.alert('erro:',JSON.stringify(googleRequest.user))
+        // Alert.alert('User:' + JSON.stringify(e))
         navigateToTags(googleRequest.user, 'google');
       }
     } else {
