@@ -3,6 +3,11 @@ const multerConfigProfile = require('../config/multerProfile');
 const multerConfigPost = require('../config/multerPost');
 
 module.exports = app => {
+    // Tags
+    app.route('/tags')
+        .post(app.api.tags.save)
+        .get(app.api.tags.index)
+
     //Login/Cadastro
     app.post('/signup', multer(multerConfigProfile).single('file'), app.api.users.save)
     app.post('/signin', app.api.auth.signin)

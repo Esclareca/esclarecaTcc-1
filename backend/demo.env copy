@@ -6,6 +6,5 @@ module.exports = {
     s3Config_secretAccessKey: 'CJKznSiy2GMV8w90xw0M0/KDsu3H/y6FZ+0so1rv',
     s3Config_bucket:'esclareca-image-upload',
     s3Config_bucketPost:'esclareca-file-upload',
-    userMail:'appesclareca@gmail.com',
-    passMail:'esclareca2020',
+    userMail:'Equipe Esclareca <appesclareca@gmail.com>'
 }

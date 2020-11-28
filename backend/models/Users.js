@@ -27,7 +27,10 @@ const UserSchema = new mongoose.Schema({
     name: String,
     email: String,
     password: String,
-    tags: [String],
+    tags: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tags'
+    }],
     key: String,
     url: String,
     createdAt: {

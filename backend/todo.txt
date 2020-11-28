@@ -1,3 +1,15 @@
+Ec2:
+ssh -i "esclareca.pem" ubuntu@ec2-54-162-88-146.compute-1.amazonaws.com
+cd api
+pm2 delete 0
+sudo rm -r esclarecaTcc
+git clone https://github.com/EsclarecaApp/esclarecaTcc.git
+cd backend
+npm i
+mv 'demo.env copy' '.env'
+pm2 start index.js
+user: smtp_user, userHash: AKIAXK2FYMLRD2UKSO2K, pass: BDzU7SJ5RWQuq0+yauZU0Mz+dxc5TT0oic3i68btACPU
+
 This sprint:
 
 

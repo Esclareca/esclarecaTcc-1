@@ -5,10 +5,11 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   AsyncStorage,
-  TextInput,
   Platform,
+  FlatList,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
+import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 
 import styles from "./styles";
 import { showError, showSucess } from "../../common";
@@ -17,21 +18,70 @@ import { AuthContext } from "../../context";
 
 export default function Tags({ route, navigation }) {
   const { singIn } = React.useContext(AuthContext);
-  const [tags, setTags] = useState("");
+  const [tags, setTags] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([])
+  const [searchText, setSearchText] = useState("");
   const tempUser = route.params.user;
   const [avatarUser, setAvatarUser] = useState("");
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    try {
-      if (tempUser.photoUrl) {
-        setAvatarUser(tempUser.photoUrl);
-      } else {
-        setAvatarUser(tempUser.picture.data.url);
-      }
-    } catch (e) {
-      console.log(e);
-    }
+    // try {
+    //   if (tempUser.photoUrl) {
+    //     setAvatarUser(tempUser.photoUrl);
+    //   } else if (tempUser.picture.data.url) {
+    //     setAvatarUser(tempUser.picture.data.url);
+    //   }
+    // } catch (e) {
+    //   console.log(e);
+    // }
   }, [route.params.user]);
+
+  useEffect(() => {
+    fetchTags()
+    async function fetchTags() {
+      await loadTags(1)
+    }
+  }, []);
+
+  async function cadastrarTag() {
+    await api.post('/tags', {
+      name: searchText
+    }).then(res => {
+      loadTags(1)
+    })
+  }
+
+  async function onSelectedItemsChange(sele) {
+    setSelectedItems(sele);
+  };
+  async function onSearchChange(text) {
+    if (text.length > 2) {
+      loadTags(page)
+    }
+  }
+  async function loadTags(pag) {
+    if (loading) {
+      return;
+    }
+
+    if (total > 0 && pag > 1 && tags.length >= total) {
+      //Impede que faça a requisição caso a qtd máxima já tenha sido atingida
+      return;
+    }
+    setLoading(true)
+    await api.get('/tags', {
+      headers: { search_text: searchText },
+      params: { page: pag },
+    }).then(t => {
+      setPage(pag + 1)
+      setTotal(t.headers["x-total-count"]);
+      setTags([...tags, ...t.data])
+      setLoading(false)
+    })
+  }
 
   async function handleSubmit() {
     try {
@@ -42,7 +92,7 @@ export default function Tags({ route, navigation }) {
         tags,
         avatarUser: avatarUser,
         type: route.params.type,
-        idGoogle: route.params.type == 'google' ? tempUser.id : '',
+        idGoogle: route.params.type == 'google' ? tempUser.uid : '',
         idFacebook: route.params.type == 'facebook' ? tempUser.id : ''
       });
       if (response.status == 204) {
@@ -53,7 +103,7 @@ export default function Tags({ route, navigation }) {
             email: tempUser.email,
             password: tempUser.id,
             type: route.params.type,
-            idGoogle: route.params.type == 'google' ? tempUser.id : '',
+            idGoogle: route.params.type == 'google' ? tempUser.uid : '',
             idFacebook: route.params.type == 'facebook' ? tempUser.id : ''
           });
           const user = response.data;
@@ -86,44 +136,6 @@ export default function Tags({ route, navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Feather name="chevron-left" size={20} color="#FFC300"></Feather>
         </TouchableOpacity>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text
-            style={{
-              fontWeight: "bold",
-              color: "white",
-              fontSize: 20,
-              marginRight: 5,
-            }}
-          >
-            Quase lá...
-          </Text>
-        </View>
-      </View>
-      <View style={styles.forms}>
-        <Text style={styles.label1}>Feeds com a sua cara!</Text>
-        <Text style={styles.label1}>Digite os assuntos de seu interesse:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Assuntos separados por ' , '"
-          placeholderTextColor="#999"
-          autoCapitalize="words"
-          autoCorrect={false}
-          multiline={true}
-          numberOfLines={7}
-          value={tags}
-          onChangeText={setTags}
-          returnKeyType="done"
-          onSubmitEditing={() => {
-            handleSubmit();
-          }}
-          blurOnSubmit={false}
-        />
         <TouchableOpacity
           style={{
             flexDirection: "row",
@@ -141,6 +153,33 @@ export default function Tags({ route, navigation }) {
           ></Feather>
         </TouchableOpacity>
       </View>
+      <View style={styles.forms}>
+        <Text style={styles.label1}>Feeds com a sua cara!</Text>
+        <Text style={styles.label1}>Escolha os assuntos de seu interesse:</Text>
+        <SectionedMultiSelect
+          items={tags}
+          IconRenderer={MaterialIcons}
+          uniqueKey="_id"
+          selectText="Escolha alguns assuntos..."
+          confirmText={"Confirmar"}
+          searchPlaceholderText={"Escolha alguns assuntos para seguir"}
+          searchAdornment={s => { setSearchText(s); onSearchChange(s) }}
+          noResultsComponent={
+            <View>
+              <Text>Nenhum item encontrado</Text>
+              <TouchableOpacity onPress={() => cadastrarTag()} style={styles.button}>
+                <Text style={styles.label2}>Cadastrar Tag</Text>
+              </TouchableOpacity>
+            </View>
+          }
+          onSelectedItemsChange={(sel) => onSelectedItemsChange(sel)}
+          selectedItems={selectedItems}
+          loading={loading}
+          itemsFlatListProps={{ initialNumToRender: 10, onEndReached: () => { loadTags(page) }, onEndReachedThreshold: 0.2 }}
+        />
+      </View>
+
     </KeyboardAvoidingView>
+
   );
 }

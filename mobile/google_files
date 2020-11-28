@@ -1,0 +1,9 @@
+// https://medium.com/@grigorylapshin/oauth-in-react-native-with-expo-c383ee371f4a
+// https://console.developers.google.com/apis/credentials/key/6b6cc691-9dfe-4438-8d1e-436590f089fc?authuser=3&folder=&organizationId=&project=appesclareca&supportedpurview=project
+// https://docs.expo.io/versions/latest/sdk/google/?redirected#deploying-to-a-standalone-app-on-android
+
+Accessing credentials for joseaedb in project testapkss
+Google Certificate Fingerprint:     EB:E4:1F:E2:16:CC:2C:5F:91:7E:BC:F0:E7:B0:11:6B:C1:9F:D1:BD
+Google Certificate Hash (SHA-1):    EBE41FE216CC2C5F917EBCF0E7B0116BC19FD1BD
+Google Certificate Hash (SHA-256):  73469EF8F0176F050B44727E0DA7563DD6EF7AC0A23BF786A7BD126C176D90ED
+Facebook Key Hash:                  6+Qf4hbMLF+Rfrzw57ARa8Gf0b0=

@@ -25,7 +25,10 @@ const PostsSchema = new mongoose.Schema({
   title: String,
   desc: String,
   postedIn: Date,
-  tags: [String],
+  tags: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Tags'
+  }],
   type: Boolean,
   solved: Boolean,
   user: {

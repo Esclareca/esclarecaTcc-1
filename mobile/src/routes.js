@@ -94,6 +94,7 @@ const drawerNavigator = () => (
   >
     <drawer.Screen name="Home" component={PostStack}></drawer.Screen>
     <drawer.Screen name="Profile" component={Profile}></drawer.Screen>
+    <HomeStack.Screen name="Tags" component={Tags}></HomeStack.Screen>
     <drawer.Screen name="Preferences" component={Preferences}></drawer.Screen>
     <drawer.Screen name="Ranking" component={Ranking}></drawer.Screen>
     <drawer.Screen name="HomeSlack" component={SlackStack}></drawer.Screen>
@@ -159,11 +160,7 @@ function CustomDrawerContent(props) {
                 <Avatar
                   rounded
                   source={{
-                    uri: avatar
-                      ? avatar.includes("s3")
-                        ? `${avatar}?${new Date().getTime()}`
-                        : avatar
-                      : "https://www.colegiodepadua.com.br/img/user.png",
+                    uri: avatar ? avatar : "https://www.colegiodepadua.com.br/img/user.png",
                   }}
                   size={50}
                 />
@@ -174,7 +171,7 @@ function CustomDrawerContent(props) {
                     maxWidth: 200,
                   }}
                 >
-                  <Text style={{ fontSize: 20, fontWeight: "bold", color:page == "profile" ? "#FFC300" : "black" }}>
+                  <Text style={{ fontSize: 20, fontWeight: "bold", color: page == "profile" ? "#FFC300" : "black" }}>
                     {userName ? userName : "Meu perfil"}
                   </Text>
                   <Text style={{ fontSize: 13, color: "#365478" }}>
@@ -344,13 +341,13 @@ export default function Routes() {
             ></AppStack.Screen>
           </AppStack.Navigator>
         ) : (
-          <App2Stack.Navigator screenOptions={{ headerShown: false }}>
-            <App2Stack.Screen
-              name="Init"
-              component={AuthStack}
-            ></App2Stack.Screen>
-          </App2Stack.Navigator>
-        )}
+            <App2Stack.Navigator screenOptions={{ headerShown: false }}>
+              <App2Stack.Screen
+                name="Init"
+                component={AuthStack}
+              ></App2Stack.Screen>
+            </App2Stack.Navigator>
+          )}
         {/*<AppStack.Navigator screenOptions={{ headerShown: false }}>
                     <AppStack.Screen name="Init" component={Init}></AppStack.Screen>
                     <AppStack.Screen name="Login" component={Login}></AppStack.Screen>

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "366556546753",
+    "firebase_url": "https://appesclareca.firebaseio.com",
+    "project_id": "appesclareca",
+    "storage_bucket": "appesclareca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366556546753:android:e8ddde6dbf1a9ded2af640",
+        "android_client_info": {
+          "package_name": "com.esclareca.appmobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "366556546753-kiht24rjedlfpiuo7f2512ntudjjortl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.esclareca.appmobile",
+            "certificate_hash": "ebe41fe216cc2c5f917ebcf0e7b0116bc19fd1bd"
+          }
+        },
+        {
+          "client_id": "366556546753-mj7s3158k9nak0bgs0s04ade246hap6c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMADBLwn9Fqq9yoFo3Imv8KuUJPRzyz5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "366556546753-mj7s3158k9nak0bgs0s04ade246hap6c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "366556546753-nfk1ao48565161rmicqg85ivc9gab100.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "host.exp.exponent"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

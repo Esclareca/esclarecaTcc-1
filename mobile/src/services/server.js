@@ -4,4 +4,4 @@
 // baseURL = 'https://esclarecabeta.herokuapp.com/'
  baseURL = 'http://54.162.88.146:3333'
 
-export default "http://54.162.88.146:3333"
+export default baseURL

@@ -31,10 +31,14 @@
       }
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "package": "com.esclareca.appmobile",
       "versionCode": 1,
       "config": {
-        "googleMobileAdsAppId": "ca-app-pub-6671400449354043~2318645269"
+        "googleMobileAdsAppId": "ca-app-pub-6671400449354043~2318645269",
+        "googleSignIn": {
+          "certificateHash":"EBE41FE216CC2C5F917EBCF0E7B0116BC19FD1BD"
+        }
       },
       "useNextNotificationsApi": true
     },

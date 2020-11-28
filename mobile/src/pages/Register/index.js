@@ -21,20 +21,19 @@ export default function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPass, setConfirmPass] = useState('');
-    const [tags, setTags] = useState('');
     const [avatar, setAvatar] = useState('https://www.colegiodepadua.com.br/img/user.png');
 
     //Inserir tratamento para caso tente inserir vazio
     async function handleSubmit() {
-        if(email && name && password && confirmPass && tags){
-            if(password === confirmPass){
+        if (email && name && password && confirmPass) {
+            if (password === confirmPass) {
                 let patternMail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                if(patternMail.test(email)){
+                if (patternMail.test(email)) {
                     let patternPass = /^(?=.*\d)(?=.*[a-z])[0-9a-z]{6,}$/
-                    if(patternPass.test(password)){
+                    if (patternPass.test(password)) {
                         try {
                             const response = await api.post('/signup', {
-                                name, email, password, tags
+                                name, email, password, tags: [], type: 'app'
                             })
                             if (response.status == 204) {
                                 showSucess("Usuário cadastrado com sucesso")
@@ -44,9 +43,9 @@ export default function Register() {
                                     });
                                     const user = response.data;
                                     try {
+                                        await AsyncStorage.setItem("token", user.token.toString());
                                         await AsyncStorage.setItem('user', user.id.toString());
                                         await AsyncStorage.setItem('userName', user.name.toString());
-                                        await AsyncStorage.setItem('userTags', user.tags.toString());
                                         if (avatar != 'https://www.colegiodepadua.com.br/img/user.png') {
                                             try {
                                                 handleSubmitPhoto(user.id)
@@ -55,7 +54,10 @@ export default function Register() {
                                                 showError(x)
                                             }
                                         }
-                                        singIn();
+                                        navigation.navigate("Tags", {
+                                            userId: user.id
+                                        });
+                                        // singIn();
                                     } catch (x) {
                                         showError(x)
                                     }
@@ -70,15 +72,15 @@ export default function Register() {
                             showError(e)
                         }
                     }
-                    else{
+                    else {
                         showError("Ajuste sua senha para que tenha pelo menos 1 número e 6 caracteres! :)")
                     }
                 }
-                else{
+                else {
                     showError("Poxa, seu email está inválido. Insira-o novamente! :D")
                 }
             }
-            else{
+            else {
                 showError('Hmmm... suas senhas não são compatíveis. Insira novamente! ;)')
             }
         }
@@ -128,18 +130,18 @@ export default function Register() {
         <KeyboardAvoidingView behavior="" style={styles.container}>
             <StatusBar barStyle="light-content" translucent={false} backgroundColor={'#365478'} />
             <View style={styles.header}>
-                <TouchableOpacity onPress ={() => navigation.goBack()}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Feather name="chevron-left" size={20} color="#FFC300"></Feather>
                 </TouchableOpacity>
-                <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 20, marginRight:5 }}>Registre-se</Text>
+                <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 20, marginRight: 5 }}>Registre-se</Text>
             </View>
             <View style={styles.forms}>
                 <TouchableOpacity style={styles.circle} onPress={() => handlePickUpdate()}>
                     <Image style={{ width: 120, height: 120, borderRadius: 120 / 2, borderWidth: 3, borderColor: "#FFF" }}
                         source={{ uri: avatar == 'https://www.colegiodepadua.com.br/img/user.png' ? avatar : avatar.uri }} />
                 </TouchableOpacity>
-            
-                <ScrollView style={{top:20}}>
+
+                <ScrollView style={{ top: 20 }}>
                     <Animatable.View
                         style={styles.form}
                         animation="fadeIn">
@@ -152,7 +154,7 @@ export default function Register() {
                             autoCorrect={false}
                             value={name}
                             onChangeText={setName}
-                            returnKeyType = { "next" }
+                            returnKeyType={"next"}
                             onSubmitEditing={() => { this.secondTextInput.focus(); }}
                             blurOnSubmit={false}
                         />
@@ -166,7 +168,7 @@ export default function Register() {
                             autoCorrect={false}
                             value={email}
                             onChangeText={setEmail}
-                            returnKeyType = { "next" }
+                            returnKeyType={"next"}
                             onSubmitEditing={() => { this.thirdTextInput.focus(); }}
                             blurOnSubmit={false}
                             ref={(input) => { this.secondTextInput = input; }}
@@ -182,7 +184,7 @@ export default function Register() {
                             autoCorrect={false}
                             value={password}
                             onChangeText={setPassword}
-                            returnKeyType = { "next" }
+                            returnKeyType={"next"}
                             onSubmitEditing={() => { this.fourthTextInput.focus(); }}
                             blurOnSubmit={false}
                             ref={(input) => { this.thirdTextInput = input; }}
@@ -198,26 +200,12 @@ export default function Register() {
                             autoCorrect={false}
                             value={confirmPass}
                             onChangeText={setConfirmPass}
-                            returnKeyType = { "next" }
-                            onSubmitEditing={() => { this.fivethTextInput.focus(); }}
+                            returnKeyType={"next"}
+                            // onSubmitEditing={() => { this.fivethTextInput.focus(); }}
                             blurOnSubmit={false}
                             ref={(input) => { this.fourthTextInput = input; }}
                         />
-                        <Text style={styles.label}>Tags <Text style={{color:'#999', fontSize:12, fontWeight:'normal'}}>(assuntos do seu interesse)</Text></Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Seus interesses separados por ' , '"
-                            placeholderTextColor="#999"
-                            autoCapitalize="words"
-                            autoCorrect={false}
-                            value={tags}
-                            onChangeText={setTags}
-                            returnKeyType="done"
-                            onSubmitEditing={() => { handleSubmit() }}
-                            blurOnSubmit={false}
-                            ref={(input) => { this.fivethTextInput = input; }}
-                        />
-                        <View style={{alignItems:'center', marginRight:5}}>
+                        <View style={{ alignItems: 'center', marginRight: 5 }}>
                             <TouchableOpacity onPress={handleSubmit} style={styles.button}>
                                 <Text style={styles.buttonText}>Registrar</Text>
                             </TouchableOpacity>

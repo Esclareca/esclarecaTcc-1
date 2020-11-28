@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   StatusBar,
+  Alert,
 } from "react-native";
 import api from "../../services/api";
 import Constants from "expo-constants";
@@ -18,7 +19,8 @@ import styles from "./styles";
 import * as Animatable from "react-native-animatable";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as Facebook from "expo-facebook";
-import * as Google from "expo-google-app-auth";
+// import * as Google from "expo-google-app-auth";
+import * as GoogleSignIn from 'expo-google-sign-in';
 import { AuthContext } from "../../context";
 import UserPermission from "../../UserPermissions";
 
@@ -46,6 +48,18 @@ export default function Init() {
     Constants.isDevice == true
       ? UserPermission.registerForPushNotifications()
       : null;
+    loadGoogleSignIn()
+    async function loadGoogleSignIn() {
+      try {
+        await GoogleSignIn.initAsync({
+          // You may ommit the clientId when the firebase `googleServicesFile` is configured
+          // clientId: '<YOUR_IOS_CLIENT_ID>',
+          // Provide other custom options...
+        });
+      } catch ({ message }) {
+        alert('GoogleSignIn.initAsync(): ' + message);
+      }
+    }
   }, []);
 
   async function FacebooklogIn() {
@@ -99,19 +113,30 @@ export default function Init() {
 
   async function GoogleLogIn() {
     let googleRequest;
+    // try {
+    //   googleRequest = await Google.logInAsync({
+    //     behavior: 'web',
+    //     androidClientId:
+    //       "366556546753-3da9s6fs4erjut74c3p7usmullq2ep4f.apps.googleusercontent.com",
+    //     iosClientId:
+    //       "366556546753-nfk1ao48565161rmicqg85ivc9gab100.apps.googleusercontent.com",
+    //     androidStandaloneAppClientId: "AIzaSyDMADBLwn9Fqq9yoFo3Imv8KuUJPRzyz5Q",
+    //     scopes: ["profile", "email"],
+    //   });
+    // } catch (e) {
+    //   console.log("Requisição ao google falhou");
+    //   console.log(e);
+    // }
+
     try {
-      googleRequest = await Google.logInAsync({
-        androidClientId:
-          "366556546753-3da9s6fs4erjut74c3p7usmullq2ep4f.apps.googleusercontent.com",
-        iosClientId:
-          "366556546753-nfk1ao48565161rmicqg85ivc9gab100.apps.googleusercontent.com",
+      await GoogleSignIn.askForPlayServicesAsync();
+      googleRequest = await GoogleSignIn.signInAsync({
         scopes: ["profile", "email"],
       });
-    } catch (e) {
-      console.log("Requisição ao google falhou");
-      console.log(e);
+    } catch ({ message }) {
+      Alert.alert('login: Error:' + JSON.stringify(message));
     }
-
+    Alert.alert('erro:',JSON.stringify(googleRequest.user))
     if (googleRequest.type === "success") {
       let loginRequest;
       //LOGIN
@@ -120,7 +145,7 @@ export default function Init() {
           email: googleRequest.user.email,
           password: '',
           type: 'google',
-          idGoogle: googleRequest.user.id
+          idGoogle: googleRequest.user.uid
           // idFacebook: data.id
         });
         await AsyncStorage.setItem("user", loginRequest.data.id.toString());
@@ -129,6 +154,7 @@ export default function Init() {
         await AsyncStorage.setItem("userTags", loginRequest.data.tags.toString());
         singIn();
       } catch (e) {
+        Alert.alert('User:' + JSON.stringify(e))
         navigateToTags(googleRequest.user, 'google');
       }
     } else {

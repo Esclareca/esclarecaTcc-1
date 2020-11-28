@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt-nodejs");
 const Users = require("../models/Users");
+const Tags = require("../models/Tags");
 const { hostIp } = require("../.env");
 const sendEmail = require('../config/email')
 const crypto = require("crypto");
@@ -20,7 +21,7 @@ module.exports = (app) => {
   };
   const save = async (req, res) => {
     const email = req.body.email.trim().toLowerCase();
-    const tags = req.body.tags.trim();
+    const tags = req.body.tags;
     const type = req.body.type;
 
     let { key = "", location: url = "" } = "";
@@ -44,7 +45,7 @@ module.exports = (app) => {
             name: req.body.name,
             email,
             password: hash,
-            tags: tags.split(",").map((tag) => tag.trim().toLowerCase()),
+            tags: tags,
             key,
             url,
             ranking: 0,
@@ -61,7 +62,7 @@ module.exports = (app) => {
           name: req.body.name,
           email,
           password: '',
-          tags: tags.split(",").map((tag) => tag.trim().toLowerCase()),
+          tags: tags,
           key,
           url,
           ranking: 0,
