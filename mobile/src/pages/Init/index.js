@@ -23,7 +23,6 @@ import * as Facebook from "expo-facebook";
 import * as GoogleSignIn from 'expo-google-sign-in';
 import { AuthContext } from "../../context";
 import UserPermission from "../../UserPermissions";
-import { showError, showSucess } from "../../common";
 
 export default function Init() {
   const navigation = useNavigation();
@@ -135,8 +134,13 @@ export default function Init() {
         scopes: ["profile", "email"],
       });
     } catch ({ message }) {
-      showError(message)
+      // Alert.alert('login: Error:' + JSON.stringify(message));
     }
+<<<<<<< HEAD
+    // Alert.alert('erro:',JSON.stringify(googleRequest.user))
+=======
+    Alert.alert('erro:', JSON.stringify(googleRequest.user))
+>>>>>>> gabriel
     if (googleRequest.type === "success") {
       let loginRequest;
       //LOGIN
@@ -154,7 +158,14 @@ export default function Init() {
         await AsyncStorage.setItem("userTags", loginRequest.data.tags.toString());
         singIn();
       } catch (e) {
+<<<<<<< HEAD
+        // Alert.alert('erro:',JSON.stringify(googleRequest.user))
+        // Alert.alert('User:' + JSON.stringify(e))
+        navigateToTags(googleRequest.user, 'google');
+=======
+        Alert.alert('User:' + JSON.stringify(e))
         await handleSubmit(googleRequest.user, 'google');
+>>>>>>> gabriel
       }
     } else {
       console.log("Login com google não obteve sucesso");
@@ -163,17 +174,16 @@ export default function Init() {
   }
 
   async function handleSubmit(tempUser, type) {
-    let avatarUser
     try {
-      if (tempUser.photoURL) {
-        avatarUser = tempUser.photoURL;
+      if (tempUser.photoUrl) {
+        const avatarUser = tempUser.photoUrl;
       } else if (tempUser.picture.data.url) {
-        avatarUser = tempUser.picture.data.url;
-      } else if (tempUser.photoUrl) {
-        avatarUser = tempUser.photoUrl;
+        const avatarUser = tempUser.picture.data.url;
+      } else if (tempUser.photoURL) {
+        const avatarUser = tempUser.photoUrl;
       }
       else {
-        avatarUser = ""
+        const avatarUser = ""
       }
     } catch (e) {
       console.log(e);
@@ -181,41 +191,44 @@ export default function Init() {
 
     try {
       const response = await api.post("/signup", {
-        name: type == 'google' ? tempUser.displayName : tempUser.name,
+        name: tempUser.name,
         email: tempUser.email,
         password: '',
-        tags: [],
+        tags,
         avatarUser: avatarUser,
         type: type,
         idGoogle: type == 'google' ? tempUser.uid : '',
         idFacebook: type == 'facebook' ? tempUser.id : ''
       });
-
-      showSucess(`Bem-vindo ${type == 'google' ? tempUser.displayName : tempUser.name}!`);
-      //navigation.goBack()
-      try {
-        const response = await api.post("/signin", {
-          email: tempUser.email,
-          password: '',
-          type: type,
-          idGoogle: type == 'google' ? tempUser.uid : '',
-          idFacebook: type == 'facebook' ? tempUser.id : ''
-        });
-        const user = response.data;
+      if (response.status == 204) {
+        showSucess(`Bem-vindo ${tempUser.name}!`);
+        //navigation.goBack()
         try {
-          await AsyncStorage.setItem("token", user.token.toString());
-          await AsyncStorage.setItem("user", user.id.toString());
-          await AsyncStorage.setItem("userName", user.name.toString());
-          await AsyncStorage.setItem("userTags", user.tags.toString());
-          // singIn();
-          navigation.navigate("Tags", {
-            userId: user.id, isRegistering: true
+          const response = await api.post("/signin", {
+            email: tempUser.email,
+            password: tempUser.id,
+            type: type,
+            idGoogle: type == 'google' ? tempUser.uid : '',
+            idFacebook: type == 'facebook' ? tempUser.id : ''
           });
-        } catch (x) {
-          showError(x);
+          const user = response.data;
+          try {
+            await AsyncStorage.setItem("token", user.token.toString());
+            await AsyncStorage.setItem("user", user.id.toString());
+            await AsyncStorage.setItem("userName", user.name.toString());
+            await AsyncStorage.setItem("userTags", user.tags.toString());
+            // singIn();
+            navigation.navigate("Tags", {
+              userId: user.id, isRegistering: true
+            });
+          } catch (x) {
+            showError(x);
+          }
+        } catch (e) {
+          showError("Error:\n" + e);
         }
-      } catch (e) {
-        showError(e)
+      } else {
+        showError("Erro");
       }
     } catch (e) {
       showError(e);

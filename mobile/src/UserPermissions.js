@@ -1,6 +1,6 @@
 import Constants from 'expo-constants'
 import * as Permissions from 'expo-permissions'
-import { Notifications } from 'expo';
+import * as Notifications from 'expo-notifications';
 import api from "../src/services/api";
 import { AsyncStorage } from 'react-native';
 
