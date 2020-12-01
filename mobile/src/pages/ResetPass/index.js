@@ -17,7 +17,7 @@ export default function ResetPass({ route, navigation }) {
     async function handleResetPass() {
         if (newPass.trim() == confirmPass.trim()) {
             if (hash && newPass) {
-                let patternPass = /^(?=.*\d)(?=.*[a-z])[0-9a-z]{6,}$/
+                let patternPass = /^(?=.*[a-z])(?=.*[0-9]).{6,64}$/
                 if (patternPass.test(newPass)) {
                     try {
                         await api.post('/resetPass', {
@@ -46,7 +46,7 @@ export default function ResetPass({ route, navigation }) {
                         showError(e)
                     }
                 } else {
-                    showError("Ajuste sua senha para que tenha pelo menos 1 número e 6 caracteres! :)")
+                    showError("Ajuste sua senha para que tenha pelo menos 6 caracteres, sendo ao menos 1 letra e 1 número! :)")
                 }
             }
             else {
@@ -64,9 +64,10 @@ export default function ResetPass({ route, navigation }) {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Feather name="chevron-left" size={20} color="#FFC300"></Feather>
                 </TouchableOpacity>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 20, marginRight: 5 }}>Esqueci a senha</Text>
-                </View>
+                <TouchableOpacity onPress={handleResetPass} style={{flexDirection: 'row'}}>
+                    <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 20, marginRight: 5 }}>Alterar a senha</Text>
+                    <Feather name="chevron-right" size={20} color="#FFC300" />
+                </TouchableOpacity>
             </View>
             <View style={styles.forms}>
                 <Text style={styles.label1}>Digite o código enviado no email:</Text>
@@ -112,10 +113,6 @@ export default function ResetPass({ route, navigation }) {
                     blurOnSubmit={false}
                     ref={(input) => { this.thirdTextInput = input; }}
                 />
-                <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }} onPress={handleResetPass}>
-                    <Text style={styles.label}>Salvar</Text>
-                    <Feather name="chevron-right" size={24} style={{ top: 1, left: 2 }} color="#FFC300"></Feather>
-                </TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
     )

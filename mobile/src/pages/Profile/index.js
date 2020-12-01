@@ -43,7 +43,6 @@ export default function Profile({ route, navigation }) {
 
   //Usuário
   const [userId, setUserId] = useState(route.params.userId);
-  const [loggedUser, setLoggedUser] = useState("");
   const [isLoggedUser, setIsLoggedUser] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
@@ -98,7 +97,6 @@ export default function Profile({ route, navigation }) {
   async function loadUser(id) {
     try {
       const usuarioAtual = await AsyncStorage.getItem("user");
-      setLoggedUser(usuarioAtual);
       const response = await api.get(`/users/${id}`, {
         headers: { user_id: usuarioAtual },
       });
@@ -733,7 +731,7 @@ export default function Profile({ route, navigation }) {
         posts={posts}
         reloadPosts={reloadPosts}
         refreshing={refreshing}
-        loadPosts={loadPosts}
+        loadPosts={()=>{loadPosts(); loadUser(route.params.userId);}}
         searchSolved={false}
         searchFavorite={false}
         loading={loading}

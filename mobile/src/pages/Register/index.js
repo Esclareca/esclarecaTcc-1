@@ -27,7 +27,7 @@ export default function Register() {
             if (password === confirmPass) {
                 let patternMail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
                 if (patternMail.test(email)) {
-                    let patternPass = /^(?=.*\d)(?=.*[a-z])[0-9a-z]{6,}$/
+                    let patternPass = /^(?=.*[a-z])(?=.*[0-9]).{6,64}$/
                     if (patternPass.test(password)) {
                         try {
                             const response = await api.post('/signup', {
@@ -71,7 +71,7 @@ export default function Register() {
                         }
                     }
                     else {
-                        showError("Ajuste sua senha para que tenha pelo menos 1 número e 6 caracteres! :)")
+                        showError("Ajuste sua senha para que tenha pelo menos 6 caracteres, sendo ao menos 1 letra e 1 número! :)")
                     }
                 }
                 else {
@@ -131,7 +131,10 @@ export default function Register() {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Feather name="chevron-left" size={20} color="#FFC300"></Feather>
                 </TouchableOpacity>
-                <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 20, marginRight: 5 }}>Registre-se</Text>
+                <TouchableOpacity onPress={handleSubmit} style={{flexDirection: 'row'}}>
+                    <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 20, marginRight: 5 }}>Registre-se</Text>
+                    <Feather name="chevron-right" size={20} color="#FFC300" />
+                </TouchableOpacity>
             </View>
             <View style={styles.forms}>
                 <TouchableOpacity style={styles.circle} onPress={() => handlePickUpdate()}>
@@ -203,11 +206,6 @@ export default function Register() {
                             blurOnSubmit={false}
                             ref={(input) => { this.fourthTextInput = input; }}
                         />
-                        <View style={{ alignItems: 'center', marginRight: 5 }}>
-                            <TouchableOpacity onPress={handleSubmit} style={styles.button}>
-                                <Text style={styles.buttonText}>Registrar</Text>
-                            </TouchableOpacity>
-                        </View>
                     </Animatable.View>
                 </ScrollView>
             </View>

@@ -51,11 +51,9 @@ export default function SlackPage({ route, navigation }) {
     async function handlePostMessage() {
         if (messageText.trim() !== '') {
             try {
-                const user_id = await AsyncStorage.getItem('user');
                 const response = await api.post(`/slacks/${slack._id}`, {
                     slack_msg: messageText,
                 })
-
                 if (response.status == 204) {
                     //showSucess("Comentário cadastrado com sucesso")
                     setMessageText('')
@@ -117,7 +115,6 @@ export default function SlackPage({ route, navigation }) {
             if (response.data.length > 0) {
                 setPage(2)
                 setMessages(response.data)
-                // lastId = response.data[response.data.length - 1]._id
                 setLast(response.data[response.data.length - 1]._id)
                 setTotal(response.headers['x-total-count'])
             }
@@ -129,11 +126,8 @@ export default function SlackPage({ route, navigation }) {
     }
 
     async function handleDeleteMessage(slack_msg) {
-        const user_id = await AsyncStorage.getItem('user')//Fazer esse puto entrar no estado
         try {
-            const response = await api.delete(`/slacks/${slack._id}/${slack_msg}`, {
-                headers: { user_id }
-            })
+            const response = await api.delete(`/slacks/${slack._id}/${slack_msg}`)
 
             if (response.status == 204) {
                 // await reloadMessages()
@@ -160,7 +154,7 @@ export default function SlackPage({ route, navigation }) {
                         <Feather name="chevron-left" size={24} color="#FFC300"></Feather>
                     </TouchableOpacity>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 20, marginRight: 8 }}>{slack.nome + " - " + slack.tag}</Text>
+                        <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 20, marginRight: 8 }}>{slack.nome + " - " + slack.tag[0].name}</Text>
                         <Foundation name="lightbulb" size={30} color="#FFC300" style={{ marginBottom: 5 }} />
                     </View>
                 </View>

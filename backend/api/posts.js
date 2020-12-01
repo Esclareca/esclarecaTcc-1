@@ -382,6 +382,8 @@ module.exports = (app) => {
       user: user.id,
       files: [],
     }).catch((err) => res.status(400).json(err));
+    Posts.populate((post), { path: "user" })
+    Posts.populate((post), { path: "tags" })
     if (user.ranking === NaN || user.ranking === undefined) {
       value = 5;
     } else {

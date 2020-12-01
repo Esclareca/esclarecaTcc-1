@@ -20,9 +20,19 @@ import { showError, showSucess, handleDate } from "../../common";
 import styles from "./styles";
 import api from "../../services/api";
 import { AdMobBanner } from "expo-ads-admob";
+import Tag_Select from "../../Components/Tag_Select";
 
 export default function HomeSlack(props) {
   const navigation = useNavigation();
+
+  const [selectedSearch, setSelectedSearch] = useState([])
+  async function onSelectedSearchChange(sele) {
+    setSelectedSearch(sele);
+  };
+  const [selectedItems, setSelectedItems] = useState([])
+  async function onSelectedItemsChange(sele) {
+    setSelectedItems(sele);
+  };
 
   const [searchText, setSearchText] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -81,7 +91,7 @@ export default function HomeSlack(props) {
 
     try {
       const response = await api.get(`/slacks`, {
-        headers: { user_id, search_text: searchText },
+        headers: { user_id, search_text: selectedSearch.length > 0 ? selectedSearch.join(',') : '' },
         params: { page },
       });
 
@@ -111,10 +121,9 @@ export default function HomeSlack(props) {
 
     const user_id = await AsyncStorage.getItem("user");
     setIdU(user_id);
-
     try {
       const response = await api.get(`/slacks`, {
-        headers: { user_id, search_text: searchText },
+        headers: { user_id, search_text: selectedSearch.length > 0 ? selectedSearch.join(',') : '' },
         params: { page: 1 },
       });
       setSlacks(response.data);
@@ -131,7 +140,7 @@ export default function HomeSlack(props) {
 
   async function handleCreateSlack() {
     const user_id = await AsyncStorage.getItem("user");
-    if (nomeModal.trim() == "" || tagModal.trim() == "") {
+    if (nomeModal.trim() == "" || selectedItems > 0) {
       showError("Os campos nome e tag são obrigatórios");
     }
     try {
@@ -139,7 +148,7 @@ export default function HomeSlack(props) {
         `/slacks`,
         {
           nome: nomeModal,
-          tag: tagModal,
+          tag: selectedItems.length > 0 ? selectedItems.join(',') : '',
           senha: privadoModal ? senhaModal : "", //Garantir que seja enviado sem senha caso o switch esteja desativado mas tenha texto preenchido
         },
         {
@@ -285,20 +294,7 @@ export default function HomeSlack(props) {
                   </View>
                   <View style={styles.viewInput}>
                     <Text style={styles.modalSubtitle}>Tag</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Indique o tag do EsclaChat..."
-                      placeholderTextColor="#999"
-                      autoCapitalize="words"
-                      autoCorrect={false}
-                      value={tagModal}
-                      onChangeText={setTagModal}
-                      numberOfLines={2}
-                      returnKeyType={"done"}
-                      ref={(input) => {
-                        this.secondTextInput = input;
-                      }}
-                    />
+                    <Tag_Select selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} single={true} />
                   </View>
                   <View style={styles.viewInput}>
                     <Text style={styles.modalSubtitle}>É privado?</Text>
@@ -388,7 +384,6 @@ export default function HomeSlack(props) {
           />
         </View>
       </View>
-
       <View
         style={{
           flexDirection: "row",
@@ -398,21 +393,7 @@ export default function HomeSlack(props) {
           paddingVertical: 10,
         }}
       >
-        <TextInput
-          style={styles.input}
-          placeholder="Indique tag de um EsclaChat..."
-          placeholderTextColor="#999"
-          autoCapitalize="words"
-          autoCorrect={false}
-          value={searchText}
-          onChangeText={setSearchText}
-          numberOfLines={2}
-          returnKeyType="search"
-          onSubmitEditing={() => {
-            reloadSlacks();
-          }}
-          blurOnSubmit={false}
-        />
+        <Tag_Select selectedItems={selectedSearch} onSelectedItemsChange={onSelectedSearchChange} single={true} />
         <TouchableOpacity onPress={() => reloadSlacks()}>
           <Feather
             name="search"
@@ -488,7 +469,7 @@ export default function HomeSlack(props) {
                       {slack.user ? slack.user.name : ""}
                     </Text>
                     <Text style={styles.Nomepost}>
-                      {slack.tag ? slack.tag[0] : ""}
+                      {slack.tag ? slack.tag[0].name : ""}
                     </Text>
                   </TouchableOpacity>
                   {idU === slack.user._id ? (

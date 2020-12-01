@@ -55,6 +55,6 @@ module.exports = async (dest, title, body) => {
     };
 
     new AWS.SES(SESConfig).sendEmail(params).promise().then((res) => {
-        console.log(res);
+        // console.log(res);
     });
 }

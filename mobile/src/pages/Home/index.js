@@ -322,7 +322,9 @@ export default function Home() {
                 <TouchableOpacity
                   style={styles.filterButton}
                   onPress={() => {
+                    setSearchText("")
                     setSearchType("");
+                    setSelectedItems([])
                   }}
                 >
                   <Text style={styles.filterText}> Limpar</Text>
@@ -333,7 +335,6 @@ export default function Home() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-
       <StatusBar
         barStyle="light-content"
         translucent={false}
@@ -392,22 +393,24 @@ export default function Home() {
         :
         <View style={styles.Search}>
           <Tag_Select selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
-          <TouchableOpacity onPress={reloadPosts}>
-            <Feather
-              name="search"
-              size={18}
-              color="#FFC300"
-              style={{ marginTop: 2, marginRight: 20 }}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={showModalPesquisa}>
-            <Feather
-              name="more-vertical"
-              size={18}
-              color="#FFC300"
-              style={{ marginTop: 2 }}
-            />
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <TouchableOpacity onPress={reloadPosts}>
+              <Feather
+                name="search"
+                size={18}
+                color="#FFC300"
+                style={{ marginTop: 2, marginRight: 20 }}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={showModalPesquisa}>
+              <Feather
+                name="more-vertical"
+                size={18}
+                color="#FFC300"
+                style={{ marginTop: 2 }}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       }
 
