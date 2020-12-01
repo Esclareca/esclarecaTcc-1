@@ -37,7 +37,8 @@ export default function Profile({ route, navigation }) {
   //Editar perfil
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [tags, setTags] = useState("");
+  const [tags, setTags] = useState([]);
+  const [tagsId, setTagsId] = useState([]);
   const [password, setPassword] = useState("");
 
   //Usuário
@@ -104,7 +105,8 @@ export default function Profile({ route, navigation }) {
       if (response.data) {
         setName(response.data.user.name);
         setEmail(response.data.user.email);
-        setTags(response.data.user.tags);
+        setTagsId(response.data.user.tags.map((tag) => tag._id));
+        setTags(response.data.user.tags.map((tag) => tag.name));
         setUserId(response.data.user._id);
         setPassword(response.data.user.password);
         if (response.data.user.url && response.data.user.url != "") {
@@ -131,7 +133,6 @@ export default function Profile({ route, navigation }) {
     const response = await api.put(`/users`, {
       name,
       email,
-      tags: tags.toString(","),
       password,
     });
     if (response.status == 204) {
@@ -396,21 +397,6 @@ export default function Profile({ route, navigation }) {
                       blurOnSubmit={false}
                       ref={(input) => { this.secondTextInput = input; }}
                     />
-                    <Text style={styles.modalSubtitle}>Tags</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Altere suas tags de preferência..."
-                      placeholderTextColor="#999"
-                      autoCapitalize="words"
-                      autoCorrect={false}
-                      value={tags.toString(', ')}
-                      onChangeText={setTags}
-                      numberOfLines={2}
-                      returnKeyType={"next"}
-                      onSubmitEditing={() => { this.fourthTextInput.focus(); }}
-                      blurOnSubmit={false}
-                      ref={(input) => { this.thirdTextInput = input; }}
-                    />
                     <Text style={styles.modalSubtitle}>Senha</Text>
                     <TextInput
                       style={styles.input}
@@ -656,7 +642,7 @@ export default function Profile({ route, navigation }) {
               }}
             >
               <Feather name="edit" size={17} color="#FFC300"></Feather>
-              <Text style={styles.info}>{tags.toString(', ')}</Text>
+              <Text style={styles.info}>{tags.join(', ')}</Text>
             </View>
           </TouchableOpacity>
         </View>

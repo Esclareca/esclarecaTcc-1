@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 
-import { SafeAreaView, View, TextInput, TouchableOpacity, AsyncStorage, Text, ScrollView } from 'react-native';
-import { Ionicons, Feather } from "@expo/vector-icons"
+import { SafeAreaView, View, TextInput, TouchableOpacity, Text, ScrollView } from 'react-native';
+import { Feather } from "@expo/vector-icons"
+import Tag_Select from "../../Components/Tag_Select";
 
 import api from '../../services/api'
 
@@ -12,13 +13,16 @@ import { showError, showSucess } from '../../common'
 export default function NewPost({ route, navigation }) {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
-  const [tags, setTags] = useState('');
-  const [type, setType] = useState(route.params.type)
+  const type = route.params.type
+  const [selectedItems, setSelectedItems] = useState([])
+  async function onSelectedItemsChange(sele) {
+    setSelectedItems(sele);
+  };
 
   async function handleSubmit() {
     try {
       const post = await api.post(`/posts`, {
-        title, desc, tags
+        title, desc, tags: selectedItems
       }, {
         headers: { type }
       })
@@ -55,98 +59,38 @@ export default function NewPost({ route, navigation }) {
       </View>
 
       <ScrollView>
-        {type == false ?
-          <>
-            <View style={{ paddingHorizontal: 30, marginTop: 40 }}>
-              <Text style={styles.label}>Título d{type == false ? 'a dúvida' : 'o conteúdo'}</Text>
-              <TextInput
-                autoFocus={true}
-                style={styles.input}
-                placeholder={"Título que deseja dar "+(type==false?"à sua dúvida":"ao seu conteúdo")}
-                placeholderTextColor="#999"
-                autoCapitalize="words"
-                autoCorrect={false}
-                value={title}
-                onChangeText={setTitle}
-                numberOfLines={2}
-                returnKeyType = { "next" }
-                onSubmitEditing={() => { this.secondTextInput.focus(); }}
-                blurOnSubmit={false}
-              />
-              <Text style={styles.label}>Descrição d{type == false ? 'a dúvida' : 'o conteúdo'}</Text>
-              <TextInput
-                style={styles.input}
-                multiline={true}
-                numberOfLines={4}
-                placeholder={"Descreva qual "+(type==false?"à sua dúvida":"ao seu conteúdo")}
-                value={desc}
-                onChangeText={setDesc}
-                returnKeyType = { "next" }
-                onSubmitEditing={() => { this.thirdTextInput.focus(); }}
-                blurOnSubmit={false}
-                ref={(input) => { this.secondTextInput = input; }}
-              />
-              <Text style={styles.label}>Tags</Text>
-              <TextInput
-                style={styles.input}
-                placeholder={"Temas relacionados  "+(type==false?"à sua dúvida":"ao seu conteúdo")+" separados por ' , '"}
-                placeholderTextColor="#999"
-                autoCapitalize="words"
-                autoCorrect={false}
-                value={tags}
-                onChangeText={setTags}
-                numberOfLines={2}
-                returnKeyType="done"
-                ref={(input) => { this.thirdTextInput = input; }}
-              />
-            </View>
-          </>
-        :
-          <>
-            <View>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  autoFocus={true}
-                  multiline={true}
-                  numberOfLines={7}
-                  style={{flex:1, fontSize:15}}
-                  placeholder="Compartilhe seu conhecimento com texto, indicações, links ou anexando arquivos..."
-                  value={desc}
-                  onChangeText={setDesc}
-                />
-              </View>
-              <View style={{paddingHorizontal:30,marginTop:40}}>
-                <Text style={styles.label}>Título do Conteúdo</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder={"Título que deseja dar "+(type==false?"à sua dúvida":"ao seu conteúdo")}
-                  placeholderTextColor="#999"
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                  value={title}
-                  onChangeText={setTitle}
-                  numberOfLines={2}
-                  returnKeyType = { "next" }
-                  onSubmitEditing={() => { this.secondTextInput.focus(); }}
-                  blurOnSubmit={false}
-                />
-                <Text style={styles.label}>Tags</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder={"Temas relacionados  "+(type==false?"à sua dúvida":"ao seu conteúdo")+" separados por ' , '"}
-                  placeholderTextColor="#999"
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                  value={tags}
-                  onChangeText={setTags}
-                  numberOfLines={2}
-                  returnKeyType = { 'done' }
-                  ref={(input) => { this.secondTextInput = input; }}
-                />
-              </View>
-            </View>
-          </>
-        }
+        <View style={{ paddingHorizontal: 30, marginTop: 40 }}>
+          <Text style={styles.label}>Título d{type == false ? 'a dúvida' : 'o conteúdo'}</Text>
+          <TextInput
+            autoFocus={true}
+            style={styles.input}
+            placeholder={"Título que deseja dar " + (type == false ? "à sua dúvida" : "ao seu conteúdo")}
+            placeholderTextColor="#999"
+            autoCapitalize="words"
+            autoCorrect={false}
+            value={title}
+            onChangeText={setTitle}
+            numberOfLines={2}
+            returnKeyType={"next"}
+            onSubmitEditing={() => { this.secondTextInput.focus(); }}
+            blurOnSubmit={false}
+          />
+          <Text style={styles.label}>Descrição d{type == false ? 'a dúvida' : 'o conteúdo'}</Text>
+          <TextInput
+            style={styles.inputContainer}
+            multiline={true}
+            numberOfLines={4}
+            placeholder={"Descreva " + (type == false ? "qual à sua dúvida" : "seu conteúdo")}
+            value={desc}
+            onChangeText={setDesc}
+            returnKeyType={"next"}
+            // onSubmitEditing={() => { this.thirdTextInput.focus(); }}
+            blurOnSubmit={false}
+            ref={(input) => { this.secondTextInput = input; }}
+          />
+          <Text style={styles.label}>Tags</Text>
+          <Tag_Select selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

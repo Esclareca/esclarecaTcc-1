@@ -52,6 +52,14 @@ module.exports = (app) => {
         },
       },
       { $unwind: "$user" },
+      {
+        $lookup: {
+          from: "tags",
+          foreignField: "_id",
+          localField: "tags",
+          as: "tags"
+        }
+      },
       // { $lookup: { from: 'users', localField: 'likes', foreignField: '_id', as: 'likes' } },
     ]).catch((err) => res.status(400).json(err));
 
@@ -126,6 +134,14 @@ module.exports = (app) => {
         },
       },
       { $unwind: "$user" },
+      {
+        $lookup: {
+          from: "tags",
+          foreignField: "_id",
+          localField: "tags",
+          as: "tags"
+        }
+      },
       // { $lookup: { from: 'users', localField: 'likes', foreignField: '_id', as: 'likes' } },
     ]).catch((err) => res.status(400).json(err));
 
@@ -200,6 +216,14 @@ module.exports = (app) => {
         },
       },
       { $unwind: "$user" },
+      {
+        $lookup: {
+          from: "tags",
+          foreignField: "_id",
+          localField: "tags",
+          as: "tags"
+        }
+      },
       // { $lookup: { from: 'users', localField: 'likes', foreignField: '_id', as: 'likes' } },
     ]).catch((err) => res.status(400).json(err));
     return res.json(posts);
@@ -242,12 +266,11 @@ module.exports = (app) => {
       type: typeSearch,
       user: { $nin: user.blocked }
     };
-
     if (search_type === "" || search_text === "") {
       match.tags = { $in: user.tags };
     } else {
       if (search_type === "tags") {
-        match.tags = { $in: search_text.split(",") };
+        match.tags = { $in: search_text.split(',').map(s => mongoose.Types.ObjectId(s)) };
       } else {
         if (search_type === "title") {
           match.title = { $regex: search_text, $options: "i" };
@@ -301,6 +324,14 @@ module.exports = (app) => {
       },
       { $unwind: "$user" },
       {
+        $lookup: {
+          from: "tags",
+          foreignField: "_id",
+          localField: "tags",
+          as: "tags"
+        }
+      },
+      {
         $facet: {
           paginatedResults: [
             { $skip: (page - 1) * qtdLoad },
@@ -331,15 +362,11 @@ module.exports = (app) => {
     if (!desc || desc.trim() == '') {
       return res.status(400).send("Verifique se a descrição foi preenchida corretamente e tente novamente")
     }
-    if (!tags || tags.trim() == '') {
+    if (!tags || tags.length < 1) {
       return res.status(400).send("Verifique se as tags foram preenchidas corretamente e tente novamente")
     }
     if (isType == null) {
       return res.status(400).send("Verifique se o tipo de post foi preenchido corretamente e tente novamente")
-    }
-    let tag = tags.split(',').filter(tag => tag.trim().toLowerCase() != '').map(tag => tag.trim().toLowerCase());
-    if (tag.length == 0) {
-      return res.status(400).send("Verifique se as tags foram preenchidas corretamente e tente novamente")
     }
 
     title = title.trim();
@@ -349,7 +376,7 @@ module.exports = (app) => {
       title,
       desc,
       postedIn: momentTz().tz("America/Sao_Paulo").format(),
-      tags: tag,
+      tags: tags,
       type,
       closed: false,
       user: user.id,

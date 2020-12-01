@@ -9,13 +9,11 @@ import * as Animatable from 'react-native-animatable'
 import { Feather } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import UserPermission from '../../UserPermissions';
-import { AuthContext } from '../../context'
 
 import { showError, showSucess } from '../../common'
 
 export default function Register() {
     const navigation = useNavigation()
-    const { singIn } = React.useContext(AuthContext);
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -55,7 +53,7 @@ export default function Register() {
                                             }
                                         }
                                         navigation.navigate("Tags", {
-                                            userId: user.id
+                                            userId: user.id, isRegistering: true
                                         });
                                         // singIn();
                                     } catch (x) {
@@ -201,7 +199,7 @@ export default function Register() {
                             value={confirmPass}
                             onChangeText={setConfirmPass}
                             returnKeyType={"next"}
-                            // onSubmitEditing={() => { this.fivethTextInput.focus(); }}
+                            onSubmitEditing={() => handleSubmit()}
                             blurOnSubmit={false}
                             ref={(input) => { this.fourthTextInput = input; }}
                         />

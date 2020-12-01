@@ -105,7 +105,8 @@ const drawerNavigator = () => (
 //continuar aqui
 function CustomDrawerContent(props) {
   const [userName, setName] = useState("");
-  const [userTags, setTags] = useState("");
+  const [userTags, setUserTags] = useState([]);
+  const [userTagsId, setUserTagsId] = useState([]);
   const [userId, setId] = useState("");
   const [press, setPress] = useState(false);
   const [avatar, setAvatar] = useState(null);
@@ -127,7 +128,8 @@ function CustomDrawerContent(props) {
       });
       if (response.data) {
         setName(response.data.user.name);
-        setTags(response.data.user.tags);
+        setUserTagsId(response.data.user.tags.map((tag) => tag._id));
+        setUserTags(response.data.user.tags.map((tag) => tag.name));
         setId(response.data.user._id);
         setAvatar(response.data.user.url);
       }

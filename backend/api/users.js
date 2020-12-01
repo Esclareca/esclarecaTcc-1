@@ -155,12 +155,11 @@ module.exports = (app) => {
     }
   };
 
-  const patch = (req, res) => {
+  const patch = async (req, res) => {
     const user = req.user;
-    const tags = req.body.tags.trim().toLowerCase();
-
-    user = Users.findByIdAndUpdate(user.id, {
-      tags: tags.split(",").map((tag) => tag.trim().toLowerCase()),
+    const tags = req.body.tags;
+    await Users.findByIdAndUpdate(user.id, {
+      tags: tags
     })
       .then((_) => res.status(204).send())
       .catch((err) => res.status(400).json(err));
@@ -170,9 +169,11 @@ module.exports = (app) => {
     const { id } = req.params;
     const userLogged = req.user;
 
-    const user = await Users.findById(id).catch((err) =>
-      res.status(400).json(err)
-    );
+    const user = await Users.findById(id)
+      .populate("tags")
+      .catch((err) =>
+        res.status(400).json(err)
+      )
     if (!user) {
       res.status(404).json("Usuário não encontrado!")
     }
@@ -211,11 +212,14 @@ module.exports = (app) => {
     const users = await Users.find({
       name: { $regex: `${search_text}`, $options: "i" },
     })
+      .populate("tags", ['name'])
       .sort({ ranking: -1 })
       .skip((page - 1) * qtdLoad)
       .limit(qtdLoad)
+      .then((u) => { res.json(u) })
       .catch((err) => res.status(400).json(err));
-    res.json(users);
+    // console.log(users)
+    // res.json(users);
   };
 
   const blockUser = async (req, res) => {

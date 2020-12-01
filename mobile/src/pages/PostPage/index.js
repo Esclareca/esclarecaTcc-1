@@ -63,7 +63,7 @@ export default function PostPage({ route, navigation }) {
   useEffect(() => {
     rePost();
     async function rePost() {
-      const user_id = await AsyncStorage.getItem("user");
+      // const user_id = await AsyncStorage.getItem("user");
       await reloadPage();
     }
   }, [press]);
@@ -394,7 +394,7 @@ export default function PostPage({ route, navigation }) {
           <View style={{ paddingLeft: 10 }}>
             <TouchableOpacity onPress={() => navigateToProfile(post.user._id)}>
               <Text style={styles.CorpoTitle}>{post.user.name}</Text>
-              <Text style={styles.Nomepost}>{post.tags.join(', ')}</Text>
+              <Text style={styles.Nomepost}>{post.tags.map((tag) => tag.name).join(', ')}</Text>
             </TouchableOpacity>
             <ScrollView>
               <Text

@@ -100,7 +100,7 @@ export default function Init() {
           await AsyncStorage.setItem("userTags", login.tags.toString());
           singIn();
         } catch (e) {
-          navigateToTags(data, 'facebook');
+          await handleSubmit(data, 'facebook');
         }
         //
       } else {
@@ -136,7 +136,7 @@ export default function Init() {
     } catch ({ message }) {
       // Alert.alert('login: Error:' + JSON.stringify(message));
     }
-    // Alert.alert('erro:',JSON.stringify(googleRequest.user))
+    Alert.alert('erro:', JSON.stringify(googleRequest.user))
     if (googleRequest.type === "success") {
       let loginRequest;
       //LOGIN
@@ -154,13 +154,74 @@ export default function Init() {
         await AsyncStorage.setItem("userTags", loginRequest.data.tags.toString());
         singIn();
       } catch (e) {
-        // Alert.alert('erro:',JSON.stringify(googleRequest.user))
-        // Alert.alert('User:' + JSON.stringify(e))
-        navigateToTags(googleRequest.user, 'google');
+        Alert.alert('User:' + JSON.stringify(e))
+        await handleSubmit(googleRequest.user, 'google');
       }
     } else {
       console.log("Login com google não obteve sucesso");
       console.log(googleRequest);
+    }
+  }
+
+  async function handleSubmit(tempUser, type) {
+    try {
+      if (tempUser.photoUrl) {
+        const avatarUser = tempUser.photoUrl;
+      } else if (tempUser.picture.data.url) {
+        const avatarUser = tempUser.picture.data.url;
+      } else if (tempUser.photoURL) {
+        const avatarUser = tempUser.photoUrl;
+      }
+      else {
+        const avatarUser = ""
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
+    try {
+      const response = await api.post("/signup", {
+        name: tempUser.name,
+        email: tempUser.email,
+        password: '',
+        tags,
+        avatarUser: avatarUser,
+        type: type,
+        idGoogle: type == 'google' ? tempUser.uid : '',
+        idFacebook: type == 'facebook' ? tempUser.id : ''
+      });
+      if (response.status == 204) {
+        showSucess(`Bem-vindo ${tempUser.name}!`);
+        //navigation.goBack()
+        try {
+          const response = await api.post("/signin", {
+            email: tempUser.email,
+            password: tempUser.id,
+            type: type,
+            idGoogle: type == 'google' ? tempUser.uid : '',
+            idFacebook: type == 'facebook' ? tempUser.id : ''
+          });
+          const user = response.data;
+          try {
+            await AsyncStorage.setItem("token", user.token.toString());
+            await AsyncStorage.setItem("user", user.id.toString());
+            await AsyncStorage.setItem("userName", user.name.toString());
+            await AsyncStorage.setItem("userTags", user.tags.toString());
+            // singIn();
+            navigation.navigate("Tags", {
+              userId: user.id, isRegistering: true
+            });
+          } catch (x) {
+            showError(x);
+          }
+        } catch (e) {
+          showError("Error:\n" + e);
+        }
+      } else {
+        showError("Erro");
+      }
+    } catch (e) {
+      showError(e);
     }
   }
 

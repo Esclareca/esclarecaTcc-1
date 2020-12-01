@@ -106,7 +106,6 @@ export default function Network() {
       } else {
         showError(response.data);
       }
-
       setRefreshing(false); //Conclui o load
     } catch (e) {
       showError(e);
@@ -295,50 +294,9 @@ export default function Network() {
             duration={1000}
           >
             {modoTela === "todos" ||
-            (modoTela === "bloqs" && blockedUsers.includes(user._id)) ||
-            (modoTela == "follow" && followedUsers.includes(user._id)) ? (
-              <View style={styles.postHeader}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Image
-                      style={styles.avatar}
-                      source={{
-                        uri: user.url
-                          ? user.url
-                          : "https://www.colegiodepadua.com.br/img/user.png",
-                      }}
-                    />
-                    <TouchableOpacity
-                      onPress={() => navigateToProfile(user._id)}
-                    >
-                      <View style={{ marginLeft: 5 }}>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            color: "#365478",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {handleLimitBigText(user.name, 20)}
-                        </Text>
-                        <Text style={styles.postTag}>
-                          {handleLimitBigText(user.tags.join(', '), 20)}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
+              (modoTela === "bloqs" && blockedUsers.includes(user._id)) ||
+              (modoTela == "follow" && followedUsers.includes(user._id)) ? (
+                <View style={styles.postHeader}>
                   <View
                     style={{
                       flexDirection: "row",
@@ -351,21 +309,163 @@ export default function Network() {
                         flexDirection: "row",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        marginRight: 25,
                       }}
                     >
-                      <Feather name="award" size={17} color="#F5B7B1" />
-                      <Text style={{ fontSize: 12, color: "#F5B7B1" }}>
-                        {user.ranking} pontos
-                      </Text>
+                      <Image
+                        style={styles.avatar}
+                        source={{
+                          uri: user.url
+                            ? user.url
+                            : "https://www.colegiodepadua.com.br/img/user.png",
+                        }}
+                      />
+                      <TouchableOpacity
+                        onPress={() => navigateToProfile(user._id)}
+                      >
+                        <View style={{ marginLeft: 5 }}>
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              color: "#365478",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {handleLimitBigText(user.name, 20)}
+                          </Text>
+                          <Text style={styles.postTag}>
+                            {/* {user.tags.map((tag) => tag.name).join(',')} */}
+                            {handleLimitBigText(user.tags.map((tag) => tag.name).join(', '), 20)}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
                     </View>
-                    {!blockedUsers.includes(user._id) ? (
-                      <>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginRight: 25,
+                        }}
+                      >
+                        <Feather name="award" size={17} color="#F5B7B1" />
+                        <Text style={{ fontSize: 12, color: "#F5B7B1" }}>
+                          {user.ranking} pontos
+                      </Text>
+                      </View>
+                      {!blockedUsers.includes(user._id) ? (
+                        <>
+                          <TouchableOpacity
+                            onPress={() =>
+                              Alert.alert(
+                                "Bloquear",
+                                "Deseja realmente bloquear o usuário?",
+                                [
+                                  {
+                                    text: "Não",
+                                    onPress: () => {
+                                      return null;
+                                    },
+                                  },
+                                  {
+                                    text: "Sim",
+                                    onPress: () => {
+                                      blockDesblockUser(user._id);
+                                    },
+                                  },
+                                ],
+                                { cancelable: false }
+                              )
+                            }
+                          >
+                            <Feather
+                              name="slash"
+                              size={20}
+                              color="#E73751"
+                            ></Feather>
+                          </TouchableOpacity>
+                          {!followedUsers.includes(user._id) ? (
+                            <View style={{ paddingLeft: 5 }}>
+                              <TouchableOpacity
+                                onPress={() =>
+                                  Alert.alert(
+                                    "Seguir",
+                                    "Deseja realmente seguir o usuário?",
+                                    [
+                                      {
+                                        text: "Não",
+                                        onPress: () => {
+                                          return null;
+                                        },
+                                      },
+                                      {
+                                        text: "Sim",
+                                        onPress: () => {
+                                          followUnfollowUser(user._id);
+                                        },
+                                      },
+                                    ],
+                                    { cancelable: false }
+                                  )
+                                }
+                              >
+                                <Feather
+                                  name="user-plus"
+                                  size={20}
+                                  color="#7DCEA0"
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          ) : null}
+
+                          {followedUsers.includes(user._id) ? (
+                            <View style={{ paddingLeft: 5 }}>
+                              <TouchableOpacity
+                                onPress={() =>
+                                  Alert.alert(
+                                    "Seguir",
+                                    "Deseja realmente parar de seguir o usuário?",
+                                    [
+                                      {
+                                        text: "Não",
+                                        onPress: () => {
+                                          return null;
+                                        },
+                                      },
+                                      {
+                                        text: "Sim",
+                                        onPress: () => {
+                                          followUnfollowUser(user._id);
+                                        },
+                                      },
+                                    ],
+                                    { cancelable: false }
+                                  )
+                                }
+                              >
+                                <Feather
+                                  name="user-minus"
+                                  size={20}
+                                  color="#7DCEA0"
+                                />
+                              </TouchableOpacity>
+                            </View>
+                          ) : null}
+                        </>
+                      ) : null}
+
+                      {blockedUsers.includes(user._id) ? (
                         <TouchableOpacity
                           onPress={() =>
                             Alert.alert(
-                              "Bloquear",
-                              "Deseja realmente bloquear o usuário?",
+                              "Desbloquear",
+                              "Deseja realmente desbloquear o usuário?",
                               [
                                 {
                                   text: "Não",
@@ -385,116 +485,16 @@ export default function Network() {
                           }
                         >
                           <Feather
-                            name="slash"
+                            name="check-circle"
                             size={20}
-                            color="#E73751"
+                            color="#7DCEA0"
                           ></Feather>
                         </TouchableOpacity>
-                        {!followedUsers.includes(user._id) ? (
-                          <View style={{ paddingLeft: 5 }}>
-                            <TouchableOpacity
-                              onPress={() =>
-                                Alert.alert(
-                                  "Seguir",
-                                  "Deseja realmente seguir o usuário?",
-                                  [
-                                    {
-                                      text: "Não",
-                                      onPress: () => {
-                                        return null;
-                                      },
-                                    },
-                                    {
-                                      text: "Sim",
-                                      onPress: () => {
-                                        followUnfollowUser(user._id);
-                                      },
-                                    },
-                                  ],
-                                  { cancelable: false }
-                                )
-                              }
-                            >
-                              <Feather
-                                name="user-plus"
-                                size={20}
-                                color="#7DCEA0"
-                              />
-                            </TouchableOpacity>
-                          </View>
-                        ) : null}
-
-                        {followedUsers.includes(user._id) ? (
-                          <View style={{ paddingLeft: 5 }}>
-                            <TouchableOpacity
-                              onPress={() =>
-                                Alert.alert(
-                                  "Seguir",
-                                  "Deseja realmente parar de seguir o usuário?",
-                                  [
-                                    {
-                                      text: "Não",
-                                      onPress: () => {
-                                        return null;
-                                      },
-                                    },
-                                    {
-                                      text: "Sim",
-                                      onPress: () => {
-                                        followUnfollowUser(user._id);
-                                      },
-                                    },
-                                  ],
-                                  { cancelable: false }
-                                )
-                              }
-                            >
-                              <Feather
-                                name="user-minus"
-                                size={20}
-                                color="#7DCEA0"
-                              />
-                            </TouchableOpacity>
-                          </View>
-                        ) : null}
-                      </>
-                    ) : null}
-
-                    {blockedUsers.includes(user._id) ? (
-                      <TouchableOpacity
-                        onPress={() =>
-                          Alert.alert(
-                            "Desbloquear",
-                            "Deseja realmente desbloquear o usuário?",
-                            [
-                              {
-                                text: "Não",
-                                onPress: () => {
-                                  return null;
-                                },
-                              },
-                              {
-                                text: "Sim",
-                                onPress: () => {
-                                  blockDesblockUser(user._id);
-                                },
-                              },
-                            ],
-                            { cancelable: false }
-                          )
-                        }
-                      >
-                        <Feather
-                          name="check-circle"
-                          size={20}
-                          color="#7DCEA0"
-                        ></Feather>
-                      </TouchableOpacity>
-                    ) : null}
+                      ) : null}
+                    </View>
                   </View>
                 </View>
-              </View>
-            ) : null}
+              ) : null}
           </Animatable.View>
         )}
       ></FlatList>

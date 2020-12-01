@@ -17,10 +17,16 @@ import api from "../../services/api";
 import styles from "./styles";
 import * as Animatable from "react-native-animatable";
 import { AuthContext } from "../../context";
+import Tag_Select from "../../Components/Tag_Select";
 
 import { showError } from "../../common";
 
 export default function Home() {
+  const [selectedItems, setSelectedItems] = useState([])
+  async function onSelectedItemsChange(sele) {
+    setSelectedItems(sele);
+  };
+
   const { singOut } = React.useContext(AuthContext);
   const navigation = useNavigation();
 
@@ -94,7 +100,7 @@ export default function Home() {
       const response = await api.get("/posts", {
         headers: {
           type,
-          search_text: searchText,
+          search_text: searchType == 'tags' ? selectedItems.join(',') : searchText,
           search_type: searchType,
         },
         params: { page },
@@ -126,7 +132,7 @@ export default function Home() {
       const response = await api.get("/posts", {
         headers: {
           type,
-          search_text: searchText,
+          search_text: searchType == 'tags' ? selectedItems.join(',') : searchText,
           search_type: searchType,
         },
         params: { page: 1 },
@@ -147,7 +153,7 @@ export default function Home() {
           [
             {
               text: "Não",
-              onPress: () => {},
+              onPress: () => { },
             },
             {
               text: "Sim",
@@ -347,24 +353,45 @@ export default function Home() {
           <Feather name="filter" size={20} color="#FFC300"></Feather>
         </TouchableOpacity>
       </View>
-
-      <View style={styles.Search}>
-        <TextInput
-          style={styles.input}
-          placeholder="Pesquise o assunto desejado..."
-          placeholderTextColor="#999"
-          autoCapitalize="words"
-          autoCorrect={false}
-          value={searchText}
-          onChangeText={setSearchText}
-          numberOfLines={2}
-          returnKeyType="search"
-          onSubmitEditing={() => {
-            reloadPosts();
-          }}
-          blurOnSubmit={false}
-        />
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      {searchType != 'tags' ?
+        <View style={styles.Search}>
+          <TextInput
+            style={styles.input}
+            placeholder="Pesquise o assunto desejado..."
+            placeholderTextColor="#999"
+            autoCapitalize="words"
+            autoCorrect={false}
+            value={searchText}
+            onChangeText={setSearchText}
+            numberOfLines={2}
+            returnKeyType="search"
+            onSubmitEditing={() => {
+              reloadPosts();
+            }}
+            blurOnSubmit={false}
+          />
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <TouchableOpacity onPress={reloadPosts}>
+              <Feather
+                name="search"
+                size={18}
+                color="#FFC300"
+                style={{ marginTop: 2, marginRight: 20 }}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={showModalPesquisa}>
+              <Feather
+                name="more-vertical"
+                size={18}
+                color="#FFC300"
+                style={{ marginTop: 2 }}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        :
+        <View style={styles.Search}>
+          <Tag_Select selectedItems={selectedItems} onSelectedItemsChange={onSelectedItemsChange} />
           <TouchableOpacity onPress={reloadPosts}>
             <Feather
               name="search"
@@ -382,7 +409,8 @@ export default function Home() {
             />
           </TouchableOpacity>
         </View>
-      </View>
+      }
+
       <Posts
         posts={posts}
         reloadPosts={reloadPosts}
@@ -440,6 +468,6 @@ export default function Home() {
           <Feather name="plus" size={25} color="white"></Feather>
         </Animatable.View>
       </TouchableOpacity>
-    </View>
+    </View >
   );
 }
